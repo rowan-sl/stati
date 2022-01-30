@@ -1,6 +1,5 @@
 #![feature(drain_filter)]
 
-extern crate state;
 extern crate termion;
 
 use core::cell::RefCell;

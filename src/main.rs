@@ -5,7 +5,6 @@ extern crate stati;
 use std::{thread::sleep, time::Duration};
 
 use stati::*;
-use stati::{println, print};
 
 
 fn main() {
