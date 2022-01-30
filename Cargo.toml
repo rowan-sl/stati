@@ -1,0 +1,18 @@
+[package]
+name = "stati"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+state = "0.5.2"
+termion = "1.5.6"
+
+[lib]
+name = "stati"
+path = "src/lib.rs"
+
+[[bin]]
+name = "stati-test"
+path = "src/main.rs"
