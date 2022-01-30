@@ -2,6 +2,12 @@
 name = "stati"
 version = "0.0.0-beta"
 edition = "2021"
+license = "MIT"
+authors = ["Rowan S-L <rowan@fawkes.io>"]
+description = "A library for progress (bars)"
+repository = "https://github.com/rowan-sl/stati/"
+keywords = ["cli", "terminal", "bar", "progress"]
+catagories = ["command-line-interface"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

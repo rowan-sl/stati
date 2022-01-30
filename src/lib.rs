@@ -74,6 +74,12 @@ impl BarManager {
     }
 }
 
+impl Default for BarManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Clone)]
 pub struct BarWrapper (Rc<RefCell<Bar>>);
 
