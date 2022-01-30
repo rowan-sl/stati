@@ -1,5 +1,3 @@
-#![feature(format_args_nl)]
-
 extern crate stati;
 
 use std::{thread::sleep, time::Duration};
