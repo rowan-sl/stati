@@ -1,0 +1,10 @@
+//! trait imports for stati.
+//! 
+//! please not that this is **only** trait imports,
+//! and also renames all items to __stati_<name>
+//! as to avoid namespace colision.
+//! 
+//! if you want to use a trait yourself, and not just its methods,
+//! import it seperatly
+
+pub use crate::IsBar as __stati_IsBar;
