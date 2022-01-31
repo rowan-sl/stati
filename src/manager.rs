@@ -15,6 +15,10 @@ to display the bar, simply call `.print()`.
 in adition, the bar will be automaticaly printed when using
 the [`print!`] and [`println!`] macros.
 
+Please note that you currently cannot use more than one bar type
+in a manager. this may change in the future as it *is* kinda a problem,
+but fixing it would have some tradeoffs
+
 ## Examples
 
 simple bar
@@ -55,6 +59,11 @@ for i in 0..=100 {
 }
 # }
 ```
+
+# A note on ANSI controll charecters
+The way that this uses these charecters to re-print bars is rather finicky,
+and if you use ANSI text while using this, it probably will work, but could
+also break and cause hard to debug errors.
 
 ## Thread Saftey
 ***n o***
