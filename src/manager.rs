@@ -71,12 +71,12 @@ also break and cause hard to debug errors.
 [`print!`]: crate::print
 [`println!`]: crate::print
 */
-pub struct BarManager<B: IsBar> {
-    bars: Vec<Rc<RefCell<B>>>,
+pub struct BarManager<P> {
+    bars: Vec<Rc<RefCell<dyn IsBar<Progress = P>>>>,
     last_lines: usize,
 }
 
-impl<B: IsBar> BarManager<B> {
+impl<P> BarManager<P> {
     /// Creates a new [`BarManager`]
     pub fn new() -> Self {
         Self {
@@ -88,10 +88,9 @@ impl<B: IsBar> BarManager<B> {
     /// Creates a new progeress bar, returning what is effectivley
     /// reference to it. when the reference is dropped or `.done()` is called,
     /// the bar is finished, and is no longer tracked or re-printed.
-    pub fn new_bar(&mut self, name: String) -> BarWrapper<B> {
+    pub fn new_bar<B: IsBar<Progress = P>>(&mut self, name: String) -> BarWrapper<P> {
         let bar = Rc::new(RefCell::new(B::new(name)));
         self.bars.push(bar.clone());
-        bar.into()
     }
 
     /// Formats the current progress bars, along with the text as messages

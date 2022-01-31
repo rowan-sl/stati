@@ -8,11 +8,12 @@ use crate::isbar::IsBar;
 /// 
 /// [`Bar`]: IsBar
 #[derive(Clone)]
-pub struct BarWrapper<B: IsBar> (Rc<RefCell<B>>);
+pub struct BarWrapper<P> (Rc<RefCell<dyn IsBar<Progress = P>>>);
 
-impl<B: IsBar> BarWrapper<B> {
+impl<P> BarWrapper<P> {
+    pub(crate) fn new(b: Rc<RefCell<dyn IsBar<Progress = P>>>) -> Self {Self (b)}
     /// Sets the progress of the bar. for more info, see [`IsBar::set_progress`]
-    pub fn set_progress(&mut self, progress: B::Progress) {
+    pub fn set_progress(&mut self, progress: P) {
         self.0.borrow_mut().set_progress(progress);
     }
 
@@ -30,13 +31,13 @@ impl<B: IsBar> BarWrapper<B> {
     }
 }
 
-impl<B: IsBar> From<Rc<RefCell<B>>> for BarWrapper<B> {
-    fn from(item: Rc<RefCell<B>>) -> Self {
+impl<P> From<Rc<RefCell<dyn IsBar<Progress = P>>>> for BarWrapper<P> {
+    fn from(item: Rc<RefCell<dyn IsBar<Progress = P>>>) -> Self {
         Self (item)
     }
 }
 
-impl<B: IsBar> Drop for BarWrapper<B> {
+impl<P> Drop for BarWrapper<P> {
     fn drop(&mut self) {
         if let Ok(mut b) = self.0.try_borrow_mut() {
             b.done();
