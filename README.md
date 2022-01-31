@@ -4,7 +4,7 @@ Rust library for progress bars
 
 ## WARNING
 
-currently very unfinished, highly undocumented, and requires nightly rust to build,
+currently very unfinished, semi-undocumented, and requires nightly rust to build,
 as it is still very much in development.
 
 ## Installation

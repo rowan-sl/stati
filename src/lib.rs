@@ -1,4 +1,5 @@
 #![feature(drain_filter)]
+//! library for progress (bars)
 
 extern crate termion;
 

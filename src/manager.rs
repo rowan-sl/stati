@@ -5,10 +5,62 @@ use crate::isbar::IsBar;
 use crate::wrapper::BarWrapper;
 
 /**
-manager for all current progress bars and text output.
+Manager for all current progress bars and text output.
 
-when printing text, when text is printed it removes all (unfinished) 
-bars, prints the text, and reprints all bars
+This can be used, with the new_bar method and
+the [`println!`] and [`print!`] (crate) macros
+to display progress bars and even print while doing so
+
+to display the bar, simply call `.print()`.
+in adition, the bar will be automaticaly printed when using
+the [`print!`] and [`println!`] macros.
+
+## Examples
+
+simple bar
+
+```rust
+use std::thread;
+
+use stati::BarManager;
+
+# fn main() {
+let mut manager = BarManager::<stati::bars::SimpleBar>::new();
+let mut bar = manager.new_bar("Working...".into());
+for i in 0..=100 {
+    bar.set_progress(i);
+    manager.print();
+    # #[allow(deprecated)]
+    thread::sleep_ms(40);
+}
+# }
+```
+
+printing while using progress bar
+
+```rust
+use std::thread;
+
+use stati::BarManager;
+
+# fn main() {
+let mut manager = BarManager::<stati::bars::SimpleBar>::new();
+let mut bar = manager.new_bar("Working...".into());
+for i in 0..=100 {
+    bar.set_progress(i);
+    stati::println!(manager, "Progressed to {} in the first section", i);
+    manager.print();
+    # #[allow(deprecated)]
+    thread::sleep_ms(40);
+}
+# }
+```
+
+## Thread Saftey
+***n o***
+
+[`print!`]: crate::print
+[`println!`]: crate::print
 */
 pub struct BarManager<B: IsBar> {
     bars: Vec<Rc<RefCell<B>>>,
@@ -16,6 +68,7 @@ pub struct BarManager<B: IsBar> {
 }
 
 impl<B: IsBar> BarManager<B> {
+    /// Creates a new [`BarManager`]
     pub fn new() -> Self {
         Self {
             bars: vec![],
@@ -23,12 +76,20 @@ impl<B: IsBar> BarManager<B> {
         }
     }
 
+    /// Creates a new progeress bar, returning what is effectivley
+    /// reference to it. when the reference is dropped or `.done()` is called,
+    /// the bar is finished, and is no longer tracked or re-printed.
     pub fn new_bar(&mut self, name: String) -> BarWrapper<B> {
         let bar = Rc::new(RefCell::new(B::new(name)));
         self.bars.push(bar.clone());
         bar.into()
     }
 
+    /// Formats the current progress bars, along with the text as messages
+    /// that have been printed in this time, to a string.
+    /// 
+    /// this assumes that nothing has been written to stdout in the time since it was last called, and as such
+    /// you should not use `std::println!` or `std::print!` with this, and instead `stati::println!` or `stati::print!`
     pub fn display(&mut self, text: &str) -> String {
         let mut res = String::new();
         // ESC CSI n F (move to the start of the line n lines up)
@@ -50,11 +111,17 @@ impl<B: IsBar> BarManager<B> {
         res
     }
 
+    /// Queues text to be printed before the bars. this should NOT be use
+    /// directly, but should be used with the println! and print! macros
     pub fn queue_text(&mut self, text: &str) {
         std::print!("{}", self.display(text));
         std::io::stdout().flush().unwrap();
     }
 
+    /// Print the current bars to stdout
+    /// 
+    /// This should be called after updating progress bars,
+    /// but does not need to be called after using println! or print!
     pub fn print(&mut self) {
         std::print!("{}", self.display(""));
         std::io::stdout().flush().unwrap();
