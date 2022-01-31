@@ -33,7 +33,7 @@ extern crate stati;
 let mut manager = BarManager::<stati::bars::SimpleBar>::new();
 let mut bar = manager.new_bar("Working...".into());
 for i in 0..=100 {
-    bar.set_precent(i);
+    bar.set_progress(i);
     manager.print();
     thread::sleep_ms(100);
 }
@@ -55,4 +55,5 @@ while a bar was running. this crate aims to solve all of these issues,
 and generaly make it much nicer to use.
 
 ## Lisence
+
 MIT, see [LISENCE](LICENSE)
