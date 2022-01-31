@@ -30,7 +30,7 @@ use std::thread;
 
 extern crate stati;
 
-let mut manager = BarManager::new();
+let mut manager = BarManager::<stati::bars::SimpleBar>::new();
 let mut bar = manager.new_bar("Working...".into());
 for i in 0..=100 {
     bar.set_precent(i);
@@ -42,7 +42,7 @@ for i in 0..=100 {
 To print text while using a progress bar, use the `println` and `print` macros like so
 
 ```rust
-let mut manager = BarManager::new();
+let mut manager = BarManager::<stati::bars::SimpleBar>::new();
 stati::println!(manager, "Progressed to {} precent", i);
 ```
 
