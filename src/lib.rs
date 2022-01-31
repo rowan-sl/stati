@@ -2,6 +2,8 @@
 
 extern crate termion;
 
+pub mod bars;
+
 use core::cell::RefCell;
 use std::{rc::Rc, io::Write};
 
@@ -11,24 +13,18 @@ pub(crate) fn term_width() -> std::io::Result<u16> {
     Ok(terminal_size()?.0)
 }
 
-const FILLED: &str = "=";
-const EMPTY: &str = "-";
-const START: &str = "[";
-const END: &str = "]";
-const UNIT: &str = "%";
-
 /**
 manager for all current progress bars and text output.
 
 when printing text, when text is printed it removes all (unfinished) 
 bars, prints the text, and reprints all bars
 */
-pub struct BarManager {
-    bars: Vec<Rc<RefCell<Bar>>>,
+pub struct BarManager<B: IsBar> {
+    bars: Vec<Rc<RefCell<B>>>,
     last_lines: usize,
 }
 
-impl BarManager {
+impl<B: IsBar> BarManager<B> {
     pub fn new() -> Self {
         Self {
             bars: vec![],
@@ -36,8 +32,8 @@ impl BarManager {
         }
     }
 
-    pub fn new_bar(&mut self, name: String) -> BarWrapper {
-        let bar = Rc::new(RefCell::new(Bar::new(name)));
+    pub fn new_bar(&mut self, name: String) -> BarWrapper<B> {
+        let bar = Rc::new(RefCell::new(B::new(name)));
         self.bars.push(bar.clone());
         bar.into()
     }
@@ -74,18 +70,22 @@ impl BarManager {
     }
 }
 
-impl Default for BarManager {
+impl<B: IsBar> Default for BarManager<B> {
     fn default() -> Self {
         Self::new()
     }
 }
 
 #[derive(Clone)]
-pub struct BarWrapper (Rc<RefCell<Bar>>);
+pub struct BarWrapper<B: IsBar> (Rc<RefCell<B>>);
 
-impl BarWrapper {
-    pub fn set_precent(&mut self, precent: usize) {
-        self.0.borrow_mut().set_precent(precent);
+impl<B: IsBar> BarWrapper<B> {
+    pub fn set_progress(&mut self, progress: B::Progress) {
+        self.0.borrow_mut().set_progress(progress);
+    }
+
+    pub fn set_name(&mut self, job_name: String) {
+        self.0.borrow_mut().set_name(job_name);
     }
 
     pub fn done(&mut self) {
@@ -93,13 +93,13 @@ impl BarWrapper {
     }
 }
 
-impl From<Rc<RefCell<Bar>>> for BarWrapper {
-    fn from(item: Rc<RefCell<Bar>>) -> Self {
+impl<B: IsBar> From<Rc<RefCell<B>>> for BarWrapper<B> {
+    fn from(item: Rc<RefCell<B>>) -> Self {
         Self (item)
     }
 }
 
-impl Drop for BarWrapper {
+impl<B: IsBar> Drop for BarWrapper<B> {
     fn drop(&mut self) {
         if let Ok(mut b) = self.0.try_borrow_mut() {
             b.done();
@@ -107,79 +107,20 @@ impl Drop for BarWrapper {
     }
 }
 
-pub struct Bar {
-    job_name: String,
-    precentage: usize,
-    finished: bool,
-}
+pub trait IsBar {
+    type Progress;
 
-impl Bar {
-    pub fn new(name: String) -> Self {
-        Self {
-            job_name: name.chars().filter(|ch| {ch != &'\n' || ch != &'\r'}).collect(),
-            precentage: 0,
-            finished: false,
-        }
-    }
+    fn new(job_name: String) -> Self where Self: Sized;
 
-    pub fn done(&mut self) {
-        self.finished = true;
-    }
+    fn done(&mut self);
 
-    pub fn is_done(&self) -> bool {
-        self.finished
-    }
+    fn is_done(&self) -> bool;
 
-    pub fn set_precent(&mut self, precent: usize) {
-        self.precentage = precent;
-    }
+    fn set_progress(&mut self, progress: Self::Progress);
 
-    /// Some implementation details:
-    /// 
-    /// starts with "\r" and has no end char
-    /// 
-    ///  if it cannot get the real term size, uses 81 as the size
-    pub fn display(&self) -> String {
-        //TODO make this not use default
-        let width = term_width().unwrap_or(81) as i32;
+    fn set_name(&mut self, job_name: String);
 
-        let mut res = String::with_capacity(width as usize /* starts out as a u16, so its fine */);
-
-        let overhead = self.precentage / 100;
-        let left_percentage = self.precentage - overhead * 100;
-        let bar_len = width - (50 + 5) - 2;
-        let bar_finished_len = ((bar_len as f32) *
-                                (left_percentage as f32 / 100.0)) as i32;
-        let filled_symbol = if overhead & 0b1 == 0 {
-            FILLED
-        } else {
-            EMPTY
-        };
-        let empty_symbol = if overhead & 0b1 == 0 {
-            EMPTY
-        } else {
-            FILLED
-        };
-
-        res += "\r";
-
-        // pad to 50 chars on right
-        res += &format!("{:<50}", self.job_name);
-        res += START;
-        for _ in 0..bar_finished_len {
-            res += filled_symbol;
-        }
-        for _ in bar_finished_len..bar_len {
-            res += empty_symbol;
-        }
-        res += END;
-
-        //pad to 4 chars on left
-        res += &format!("{:>4}", self.precentage);
-        res += UNIT;
-
-        res
-    }
+    fn display(&self) -> String;
 }
 
 pub mod macros {
