@@ -57,3 +57,13 @@ and generaly make it much nicer to use.
 ## Lisence
 
 MIT, see [LISENCE](LICENSE)
+
+## TODO's
+
+- [ ] improve docs
+- [ ] improve tests
+- [ ] improve examples
+- [ ] add builder pattern support for making progress bars
+- [ ] better iterator tracking
+- [ ] multithreading?
+- [ ] create bar style with string formatting like indicatif?
