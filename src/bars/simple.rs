@@ -18,7 +18,10 @@ impl crate::IsBar for SimpleBar {
 
     fn new(name: String, _: ()) -> Self {
         Self {
-            job_name: name.chars().filter(|ch| {ch != &'\n' || ch != &'\r'}).collect(),
+            job_name: name
+                .chars()
+                .filter(|ch| ch != &'\n' || ch != &'\r')
+                .collect(),
             precentage: 0,
             finished: false,
         }
@@ -41,31 +44,23 @@ impl crate::IsBar for SimpleBar {
     }
 
     /// Some implementation details:
-    /// 
+    ///
     /// starts with "\r" and has no end char
-    /// 
+    ///
     ///  if it cannot get the real term size, uses 81 as the size
     fn display(&self) -> String {
         //TODO make this not use default
         let width = crate::utils::term_width().unwrap_or(81) as i32;
 
-        let mut res = String::with_capacity(width as usize /* starts out as a u16, so its fine */);
+        let mut res =
+            String::with_capacity(width as usize /* starts out as a u16, so its fine */);
 
         let overhead = self.precentage / 100;
         let left_percentage = self.precentage - overhead * 100;
         let bar_len = width - (50 + 5) - 2;
-        let bar_finished_len = ((bar_len as f32) *
-                                (left_percentage as f32 / 100.0)) as i32;
-        let filled_symbol = if overhead & 0b1 == 0 {
-            FILLED
-        } else {
-            EMPTY
-        };
-        let empty_symbol = if overhead & 0b1 == 0 {
-            EMPTY
-        } else {
-            FILLED
-        };
+        let bar_finished_len = ((bar_len as f32) * (left_percentage as f32 / 100.0)) as i32;
+        let filled_symbol = if overhead & 0b1 == 0 { FILLED } else { EMPTY };
+        let empty_symbol = if overhead & 0b1 == 0 { EMPTY } else { FILLED };
 
         res += "\r";
 
@@ -87,3 +82,5 @@ impl crate::IsBar for SimpleBar {
         res
     }
 }
+
+impl crate::bar_subsets::PrecentageBarFlag for SimpleBar {}

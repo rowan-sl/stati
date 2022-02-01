@@ -2,11 +2,14 @@ extern crate stati;
 
 use std::{thread::sleep, time::Duration};
 
-use stati::{BarManager, bars};
-
+use stati::{bars, prelude::*, BarManager};
 
 fn main() {
     let mut bman = BarManager::new();
+    for i in (0..50).display_bar::<bars::SimpleBar>(&mut bman, "test1".into(), ()) {
+        stati::println!(bman, "Progressed to {} with iterator", i);
+        sleep(Duration::from_millis(50));
+    }
     let mut b1 = bman.new_bar::<bars::SimpleBar>("bar1".into(), ());
     for i in 0..=50 {
         b1.set_progress(i);

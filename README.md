@@ -18,7 +18,7 @@ rustup override set nightly
 Then add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.4.0-beta"
+stati = "0.5.0-beta"
 ```
 
 ## Usage

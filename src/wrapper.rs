@@ -5,10 +5,10 @@ use crate::isbar::IsBar;
 
 /// a wrapper around a [`Bar`], allowing the manager to keep a copy while
 /// passing one to the user
-/// 
+///
 /// [`Bar`]: IsBar
 #[derive(Clone)]
-pub struct BarWrapper<B: IsBar> (Rc<RefCell<B>>);
+pub struct BarWrapper<B: IsBar>(Rc<RefCell<B>>);
 
 impl<B: IsBar> BarWrapper<B> {
     /// Sets the progress of the bar. for more info, see [`IsBar::set_progress`]
@@ -23,7 +23,7 @@ impl<B: IsBar> BarWrapper<B> {
 
     /// Indicates that the bar has finished, and can be finalized and dropped by the manager.
     /// for more info, see [`IsBar::done`]
-    /// 
+    ///
     /// this is also called by the [`Drop`] impl on this type
     pub fn done(&mut self) {
         self.0.borrow_mut().done();
@@ -32,7 +32,7 @@ impl<B: IsBar> BarWrapper<B> {
 
 impl<B: IsBar> From<Rc<RefCell<B>>> for BarWrapper<B> {
     fn from(item: Rc<RefCell<B>>) -> Self {
-        Self (item)
+        Self(item)
     }
 }
 

@@ -1,5 +1,5 @@
 use core::cell::RefCell;
-use std::{rc::Rc, io::Write};
+use std::{io::Write, rc::Rc};
 
 use crate::isbar::{IsBar, IsBarManagerInterface};
 use crate::wrapper::BarWrapper;
@@ -98,7 +98,7 @@ impl<'bar> BarManager<'bar> {
 
     /// Formats the current progress bars, along with the text as messages
     /// that have been printed in this time, to a string.
-    /// 
+    ///
     /// this assumes that nothing has been written to stdout in the time since it was last called, and as such
     /// you should not use `std::println!` or `std::print!` with this, and instead `stati::println!` or `stati::print!`
     pub(crate) fn display(&mut self) -> String {
@@ -131,12 +131,12 @@ impl<'bar> BarManager<'bar> {
     }
 
     /// Flushes updates to stdout.
-    /// 
+    ///
     /// Currently this only flushes stdout, but will hopefully do more in the future
-    /// 
+    ///
     /// # Panics
     /// if stdout cannot be flushed
-    /// 
+    ///
     /// for a non-panicing alternative, see [`BarManager::try_flush`]
     pub fn flush(&mut self) {
         self.try_flush().unwrap();
@@ -144,17 +144,17 @@ impl<'bar> BarManager<'bar> {
 
     /// Queues text to be printed before the bars. this should NOT be use
     /// directly, but should be used with the println! and print! macros
-    /// 
+    ///
     /// this does NOT immediataly print the text
     pub fn queue_text(&mut self, text: &str) {
         self.print_queue.push(text.into());
     }
 
     /// Prints the bar status and any queued text to stdout, and flushes it.
-    /// 
+    ///
     /// # Panics
     /// if stdout cannot be flushed
-    /// 
+    ///
     /// for a non-panicing alternative, see [`BarManager::try_print`]
     pub fn print(&mut self) {
         self.try_print().unwrap();
