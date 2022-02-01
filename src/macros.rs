@@ -10,6 +10,7 @@
 macro_rules! print {
     ($bm:ident, $($arg:tt)*) => ({
         $bm.queue_text(&format!($($arg)*));
+        $bm.print();
     })
 }
 
@@ -25,6 +26,7 @@ macro_rules! println {
     ($bm: ident) => ($bm.queue_text("\n"));
     ($bm:ident, $($arg:tt)*) => ({
         $bm.queue_text(&format!("{}\n", format!($($arg)*)));
+        $bm.print();
     })
 }
 

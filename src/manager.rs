@@ -73,6 +73,7 @@ also break and cause hard to debug errors.
 */
 pub struct BarManager<B: IsBar> {
     bars: Vec<Rc<RefCell<B>>>,
+    print_queue: Vec<String>,
     last_lines: usize,
 }
 
@@ -81,6 +82,7 @@ impl<B: IsBar> BarManager<B> {
     pub fn new() -> Self {
         Self {
             bars: vec![],
+            print_queue: vec![],
             last_lines: 0,
         }
     }
@@ -99,7 +101,7 @@ impl<B: IsBar> BarManager<B> {
     /// 
     /// this assumes that nothing has been written to stdout in the time since it was last called, and as such
     /// you should not use `std::println!` or `std::print!` with this, and instead `stati::println!` or `stati::print!`
-    pub fn display(&mut self, text: &str) -> String {
+    pub(crate) fn display(&mut self) -> String {
         let mut res = String::new();
         // ESC CSI n F (move to the start of the line n lines up)
         // (this is to overwrite previous bars)
@@ -109,7 +111,10 @@ impl<B: IsBar> BarManager<B> {
         // ESC CSI 0 J (clears from cursor to end of screen)
         res += "\x1b[0J";
         // print stuff
-        res += text;
+        for item in self.print_queue.drain(..) {
+            res += &item;
+        }
+        // res += text;
         // go through all bars, removing ones that are done
         let _ = self.bars.drain_filter(|b| {
             res += &b.borrow_mut().display();
@@ -120,20 +125,50 @@ impl<B: IsBar> BarManager<B> {
         res
     }
 
-    /// Queues text to be printed before the bars. this should NOT be use
-    /// directly, but should be used with the println! and print! macros
-    pub fn queue_text(&mut self, text: &str) {
-        std::print!("{}", self.display(text));
-        std::io::stdout().flush().unwrap();
+    pub fn try_flush(&mut self) -> std::io::Result<()> {
+        std::io::stdout().flush()?;
+        Ok(())
     }
 
-    /// Print the current bars to stdout
+    /// Flushes updates to stdout.
     /// 
-    /// This should be called after updating progress bars,
-    /// but does not need to be called after using println! or print!
+    /// Currently this only flushes stdout, but will hopefully do more in the future
+    /// 
+    /// # Panics
+    /// if stdout cannot be flushed
+    /// 
+    /// for a non-panicing alternative, see [`BarManager::try_flush`]
+    pub fn flush(&mut self) {
+        self.try_flush().unwrap();
+    }
+
+    /// Queues text to be printed before the bars. this should NOT be use
+    /// directly, but should be used with the println! and print! macros
+    /// 
+    /// this does NOT immediataly print the text
+    pub fn queue_text(&mut self, text: &str) {
+        self.print_queue.push(text.into());
+    }
+
+    /// Prints the bar status and any queued text to stdout, and flushes it.
+    /// 
+    /// # Panics
+    /// if stdout cannot be flushed
+    /// 
+    /// for a non-panicing alternative, see [`BarManager::try_print`]
     pub fn print(&mut self) {
-        std::print!("{}", self.display(""));
-        std::io::stdout().flush().unwrap();
+        self.try_print().unwrap();
+    }
+
+    pub fn try_print(&mut self) -> std::io::Result<()> {
+        self.print_no_flush();
+        self.try_flush()?;
+        Ok(())
+    }
+
+    /// Prints the bar status and any queued text to stdout, without flushing it
+    pub fn print_no_flush(&mut self) {
+        std::print!("{}", self.display());
     }
 }
 
