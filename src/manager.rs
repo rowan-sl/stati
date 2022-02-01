@@ -1,7 +1,7 @@
 use core::cell::RefCell;
 use std::{rc::Rc, io::Write};
 
-use crate::isbar::IsBar;
+use crate::isbar::{IsBar, IsBarManagerInterface};
 use crate::wrapper::BarWrapper;
 
 /**
@@ -29,8 +29,8 @@ use std::thread;
 use stati::BarManager;
 
 # fn main() {
-let mut manager = BarManager::<stati::bars::SimpleBar>::new();
-let mut bar = manager.new_bar("Working...".into());
+let mut manager = BarManager::new();
+let mut bar = manager.new_bar::<stati::bars::SimpleBar>("Working...".into());
 for i in 0..=100 {
     bar.set_progress(i);
     manager.print();
@@ -48,8 +48,8 @@ use std::thread;
 use stati::BarManager;
 
 # fn main() {
-let mut manager = BarManager::<stati::bars::SimpleBar>::new();
-let mut bar = manager.new_bar("Working...".into());
+let mut manager = BarManager::new();
+let mut bar = manager.new_bar::<stati::bars::SimpleBar>("Working...".into());
 for i in 0..=100 {
     bar.set_progress(i);
     stati::println!(manager, "Progressed to {} in the first section", i);
@@ -71,13 +71,13 @@ also break and cause hard to debug errors.
 [`print!`]: crate::print
 [`println!`]: crate::print
 */
-pub struct BarManager<B: IsBar> {
-    bars: Vec<Rc<RefCell<B>>>,
+pub struct BarManager<'bar> {
+    bars: Vec<Rc<RefCell<dyn IsBarManagerInterface + 'bar>>>,
     print_queue: Vec<String>,
     last_lines: usize,
 }
 
-impl<B: IsBar> BarManager<B> {
+impl<'bar> BarManager<'bar> {
     /// Creates a new [`BarManager`]
     pub fn new() -> Self {
         Self {
@@ -90,7 +90,7 @@ impl<B: IsBar> BarManager<B> {
     /// Creates a new progeress bar, returning what is effectivley
     /// reference to it. when the reference is dropped or `.done()` is called,
     /// the bar is finished, and is no longer tracked or re-printed.
-    pub fn new_bar(&mut self, name: String) -> BarWrapper<B> {
+    pub fn new_bar<B: 'bar + IsBar>(&mut self, name: String) -> BarWrapper<B> {
         let bar = Rc::new(RefCell::new(B::new(name)));
         self.bars.push(bar.clone());
         bar.into()
@@ -172,7 +172,7 @@ impl<B: IsBar> BarManager<B> {
     }
 }
 
-impl<B: IsBar> Default for BarManager<B> {
+impl<'bar> Default for BarManager<'bar> {
     fn default() -> Self {
         Self::new()
     }

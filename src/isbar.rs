@@ -42,3 +42,19 @@ pub trait IsBar {
     /// [`BarManager`]: crate::manager::BarManager
     fn display(&self) -> String;
 }
+
+pub(crate) trait IsBarManagerInterface {
+    fn display(&self) -> String;
+
+    fn is_done(&self) -> bool;
+}
+
+impl<T> IsBarManagerInterface for T where T: IsBar {
+    fn display(&self) -> String {
+        <T as IsBar>::display(&self)
+    }
+
+    fn is_done(&self) -> bool {
+        <T as IsBar>::is_done(&self)
+    }
+}

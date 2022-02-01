@@ -6,15 +6,15 @@ use stati::{BarManager, bars};
 
 
 fn main() {
-    let mut bman = BarManager::<bars::SimpleBar>::new();
-    let mut b1 = bman.new_bar("bar1".into());
+    let mut bman = BarManager::new();
+    let mut b1 = bman.new_bar::<bars::SimpleBar>("bar1".into());
     for i in 0..=50 {
         b1.set_progress(i);
         stati::println!(bman, "Progressed to {} in the first section", i);
         bman.print();
         sleep(Duration::from_millis(50));
     }
-    let mut b2 = bman.new_bar("bar2".into());
+    let mut b2 = bman.new_bar::<bars::SimpleBar>("bar2".into());
     for i in 0..=50 {
         b1.set_progress(i+50);
         b2.set_progress(i);
