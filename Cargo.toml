@@ -1,6 +1,6 @@
 [package]
 name = "stati"
-version = "0.3.1-beta"
+version = "0.4.0-beta"
 edition = "2021"
 license = "MIT"
 authors = ["Rowan S-L <rowan@fawkes.io>"]

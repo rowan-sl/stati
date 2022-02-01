@@ -8,12 +8,15 @@ pub trait IsBar {
     /// 
     /// for example, if the bar was a precentage done, then this could be a `usize`
     type Progress;
+    
+    /// Arguments that are passed to [`IsBar::new`]
+    type Args;
 
     /// Crate a new [`Bar`] with the provided name,
     /// and a progress level of zero
     /// 
     /// [`Bar`]: IsBar
-    fn new(job_name: String) -> Self where Self: Sized;
+    fn new(job_name: String, args: Self::Args) -> Self where Self: Sized;
 
     /// Finishes the [`Bar`], allowing it to be finalized and dropped by the manager.
     /// the bar should not be used after this is called

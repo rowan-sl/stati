@@ -30,7 +30,7 @@ use stati::BarManager;
 
 # fn main() {
 let mut manager = BarManager::new();
-let mut bar = manager.new_bar::<stati::bars::SimpleBar>("Working...".into());
+let mut bar = manager.new_bar::<stati::bars::SimpleBar>("Working...".into(), ());
 for i in 0..=100 {
     bar.set_progress(i);
     manager.print();
@@ -49,7 +49,7 @@ use stati::BarManager;
 
 # fn main() {
 let mut manager = BarManager::new();
-let mut bar = manager.new_bar::<stati::bars::SimpleBar>("Working...".into());
+let mut bar = manager.new_bar::<stati::bars::SimpleBar>("Working...".into(), ());
 for i in 0..=100 {
     bar.set_progress(i);
     stati::println!(manager, "Progressed to {} in the first section", i);
@@ -90,8 +90,8 @@ impl<'bar> BarManager<'bar> {
     /// Creates a new progeress bar, returning what is effectivley
     /// reference to it. when the reference is dropped or `.done()` is called,
     /// the bar is finished, and is no longer tracked or re-printed.
-    pub fn new_bar<B: 'bar + IsBar>(&mut self, name: String) -> BarWrapper<B> {
-        let bar = Rc::new(RefCell::new(B::new(name)));
+    pub fn new_bar<B: 'bar + IsBar>(&mut self, name: String, args: B::Args) -> BarWrapper<B> {
+        let bar = Rc::new(RefCell::new(B::new(name, args)));
         self.bars.push(bar.clone());
         bar.into()
     }

@@ -14,8 +14,9 @@ pub struct SimpleBar {
 
 impl crate::IsBar for SimpleBar {
     type Progress = usize;
+    type Args = ();
 
-    fn new(name: String) -> Self {
+    fn new(name: String, _: ()) -> Self {
         Self {
             job_name: name.chars().filter(|ch| {ch != &'\n' || ch != &'\r'}).collect(),
             precentage: 0,

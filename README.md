@@ -18,7 +18,7 @@ rustup override set nightly
 Then add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.3.1-beta"
+stati = "0.4.0-beta"
 ```
 
 ## Usage
@@ -31,7 +31,7 @@ use std::thread;
 extern crate stati;
 
 let mut manager = BarManager::<stati::bars::SimpleBar>::new();
-let mut bar = manager.new_bar::<bars::SimpleBar>("Working...".into());
+let mut bar = manager.new_bar::<bars::SimpleBar>("Working...".into(), ());
 for i in 0..=100 {
     bar.set_progress(i);
     manager.print();
