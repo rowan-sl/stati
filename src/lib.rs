@@ -16,3 +16,4 @@ pub use isbar::subsets as bar_subsets;
 pub use isbar::IsBar;
 pub use manager::BarManager;
 pub use wrapper::BarWrapper;
+pub use isbar::BarCloseMethod;

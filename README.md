@@ -18,7 +18,7 @@ rustup override set nightly
 Then add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.5.0-beta"
+stati = "0.6.0-beta"
 ```
 
 ## Usage
@@ -30,8 +30,10 @@ use std::thread;
 
 extern crate stati;
 
+use stati::prelude::*;
+
 let mut manager = BarManager::<stati::bars::SimpleBar>::new();
-let mut bar = manager.new_bar::<bars::SimpleBar>("Working...".into(), ());
+let mut bar = manager.register_bar(bars::SimpleBar::new("Working...".into(), ()));
 for i in 0..=100 {
     bar.set_progress(i);
     manager.print();
@@ -63,7 +65,7 @@ MIT, see [LISENCE](LICENSE)
 - [ ] improve docs
 - [ ] improve tests
 - [ ] improve examples
-- [ ] add builder pattern support for making progress bars
+- [x] add builder pattern support for making progress bars
 - [ ] better iterator tracking
 - [ ] multithreading?
 - [ ] create bar style with string formatting like indicatif?

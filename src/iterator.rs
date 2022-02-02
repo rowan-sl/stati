@@ -1,4 +1,4 @@
-use crate::{BarManager, BarWrapper, IsBar};
+use crate::{BarWrapper, IsBar};
 
 pub struct ProgressTracker<I, B: IsBar> {
     iterator: I,
@@ -58,16 +58,14 @@ where
 }
 
 pub trait ProgressTrackingAdaptor<T>: Iterator<Item = T> + Sized {
-    /// Creates and displays a progress bar on the given bar manager wrapping an iterator
+    /// Takes controll of a progress bar (or finishes a builder),
+    /// displaying the iterators progress
     /// 
     /// currently VERY experimental, and WILL break, mainly with iterators that do not have a good size_hint function
     fn display_bar<'bar, B: 'bar + IsBar + crate::bar_subsets::PrecentageBar>(
         self,
-        manager: &mut BarManager<'bar>,
-        name: String,
-        args: <B as IsBar>::Args,
+        bar: BarWrapper<B>
     ) -> ProgressTracker<Self, B> {
-        let bar = manager.new_bar(name, args);
         ProgressTracker::new(self, bar)
     }
 }

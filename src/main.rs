@@ -6,18 +6,18 @@ use stati::{bars, prelude::*, BarManager};
 
 fn main() {
     let mut bman = BarManager::new();
-    for i in (0..50).display_bar::<bars::SimpleBar>(&mut bman, "test1".into(), ()) {
+    for i in (0..50).display_bar(bman.register_bar(bars::SimpleBar::new("Iterator".into(), ()))) {
         stati::println!(bman, "Progressed to {} with iterator", i);
         sleep(Duration::from_millis(50));
     }
-    let mut b1 = bman.new_bar::<bars::SimpleBar>("bar1".into(), ());
+    let mut b1 = bman.register_bar(bars::SimpleBar::new("bar1".into(), ()));
     for i in 0..=50 {
         b1.set_progress(i);
         stati::println!(bman, "Progressed to {} in the first section", i);
         bman.print();
         sleep(Duration::from_millis(50));
     }
-    let mut b2 = bman.new_bar::<bars::SimpleBar>("bar2".into(), ());
+    let mut b2 = bman.register_bar(bars::SimpleBar::new("bar2".into(), ()));
     for i in 0..=50 {
         b1.set_progress(i+50);
         b2.set_progress(i);

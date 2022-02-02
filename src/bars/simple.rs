@@ -81,6 +81,10 @@ impl crate::IsBar for SimpleBar {
 
         res
     }
+
+    fn close_method(&self) -> crate::isbar::BarCloseMethod {
+        crate::isbar::BarCloseMethod::LeaveBehind
+    }
 }
 
 impl crate::bar_subsets::PrecentageBarFlag for SimpleBar {}

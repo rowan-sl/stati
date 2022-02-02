@@ -27,10 +27,11 @@ simple bar
 use std::thread;
 
 use stati::BarManager;
+use stati::prelude::*;
 
 # fn main() {
 let mut manager = BarManager::new();
-let mut bar = manager.new_bar::<stati::bars::SimpleBar>("Working...".into(), ());
+let mut bar = manager.register_bar(stati::bars::SimpleBar::new("Working...".into(), ()));
 for i in 0..=100 {
     bar.set_progress(i);
     manager.print();
@@ -46,10 +47,11 @@ printing while using progress bar
 use std::thread;
 
 use stati::BarManager;
+use stati::prelude::*;
 
 # fn main() {
 let mut manager = BarManager::new();
-let mut bar = manager.new_bar::<stati::bars::SimpleBar>("Working...".into(), ());
+let mut bar = manager.register_bar(stati::bars::SimpleBar::new("Working...".into(), ()));
 for i in 0..=100 {
     bar.set_progress(i);
     stati::println!(manager, "Progressed to {} in the first section", i);
@@ -87,13 +89,13 @@ impl<'bar> BarManager<'bar> {
         }
     }
 
-    /// Creates a new progeress bar, returning what is effectivley
-    /// reference to it. when the reference is dropped or `.done()` is called,
-    /// the bar is finished, and is no longer tracked or re-printed.
-    pub fn new_bar<B: 'bar + IsBar>(&mut self, name: String, args: B::Args) -> BarWrapper<B> {
-        let bar = Rc::new(RefCell::new(B::new(name, args)));
-        self.bars.push(bar.clone());
-        bar.into()
+    /// Registers a progress bar with the bar manager, to be drawn with the manager.
+    /// Returns what is effectively a reference to it, and when that refference is dropped or `.done()` is called,
+    /// the bar is finished, and is completed according to `bar.close_method()`
+    pub fn register_bar<B: 'bar + IsBar>(&mut self, bar: B) -> BarWrapper<B> {
+        let wrapped = Rc::new(RefCell::new(bar));
+        self.bars.push(wrapped.clone());
+        wrapped.into()
     }
 
     /// Formats the current progress bars, along with the text as messages

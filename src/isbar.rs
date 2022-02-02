@@ -1,3 +1,8 @@
+pub enum BarCloseMethod {
+    LeaveBehind,
+    Clear,
+}
+
 /// Functions that a progress bar should implement,
 /// like [`SimpleBar`]
 ///
@@ -45,6 +50,8 @@ pub trait IsBar {
     /// [`Bar`]: IsBar
     /// [`BarManager`]: crate::manager::BarManager
     fn display(&self) -> String;
+
+    fn close_method(&self) -> BarCloseMethod;
 }
 
 /// Subsets of progress bars that can be used for various things
