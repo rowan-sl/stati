@@ -48,7 +48,7 @@ impl crate::IsBar for SimpleBar {
     /// starts with "\r" and has no end char
     ///
     ///  if it cannot get the real term size, uses 81 as the size
-    fn display(&self) -> String {
+    fn display(&mut self) -> String {
         //TODO make this not use default
         let width = crate::utils::term_width().unwrap_or(81) as i32;
 

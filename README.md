@@ -18,7 +18,7 @@ rustup override set nightly
 Then add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.6.0-beta"
+stati = "0.6.1-beta"
 ```
 
 ## Usage
@@ -62,6 +62,7 @@ MIT, see [LISENCE](LICENSE)
 
 ## TODO's
 
+- [x] add fun spini spinner wheeeeeeeeeeeeeeeeee
 - [ ] improve docs
 - [ ] improve tests
 - [ ] improve examples

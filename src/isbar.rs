@@ -1,3 +1,5 @@
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum BarCloseMethod {
     LeaveBehind,
     Clear,
@@ -49,7 +51,7 @@ pub trait IsBar {
     ///
     /// [`Bar`]: IsBar
     /// [`BarManager`]: crate::manager::BarManager
-    fn display(&self) -> String;
+    fn display(&mut self) -> String;
 
     fn close_method(&self) -> BarCloseMethod;
 }
@@ -80,7 +82,7 @@ pub mod subsets {
 }
 
 pub(crate) trait IsBarManagerInterface {
-    fn display(&self) -> String;
+    fn display(&mut self) -> String;
 
     fn is_done(&self) -> bool;
 }
@@ -89,8 +91,8 @@ impl<T> IsBarManagerInterface for T
 where
     T: IsBar,
 {
-    fn display(&self) -> String {
-        <T as IsBar>::display(&self)
+    fn display(&mut self) -> String {
+        <T as IsBar>::display(self)
     }
 
     fn is_done(&self) -> bool {
