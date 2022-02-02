@@ -103,6 +103,9 @@ impl<'bar> BarManager<'bar> {
     ///
     /// this assumes that nothing has been written to stdout in the time since it was last called, and as such
     /// you should not use `std::println!` or `std::print!` with this, and instead `stati::println!` or `stati::print!`
+    /// 
+    /// # Panics
+    /// if it cannot borrow any of the contained bars
     pub(crate) fn display(&mut self) -> String {
         let mut res = String::new();
         // ESC CSI n F (move to the start of the line n lines up)
@@ -119,9 +122,21 @@ impl<'bar> BarManager<'bar> {
         // res += text;
         // go through all bars, removing ones that are done
         let _ = self.bars.drain_filter(|b| {
-            res += &b.borrow_mut().display();
-            res += "\n";
-            b.borrow().is_done()
+            let mut bref = b.borrow_mut();
+            if bref.is_done() {
+                match bref.close_method() {
+                    crate::BarCloseMethod::Clear => {}
+                    crate::BarCloseMethod::LeaveBehind => {
+                        res += &bref.display();
+                        res += "\n";
+                    }
+                }
+                true
+            } else {
+                res += &bref.display();
+                res += "\n";
+                false
+            }
         });
         self.last_lines = self.bars.len();
         res

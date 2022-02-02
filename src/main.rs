@@ -6,6 +6,20 @@ use stati::{bars, prelude::*, BarManager};
 
 fn main() {
     let mut bman = BarManager::new();
+    let mut s1 = bman.register_bar(
+        bars::SpinniBuilder::new("Spinni whee".into())
+            .task_name("doing thing".into())
+            .close_method(stati::BarCloseMethod::Clear)
+            .build()
+    );
+    for i in 0..1000 {
+        if i > 700 {
+            s1.set_progress(format!("almost done! {} way there", i));
+        }
+        bman.print();
+        sleep(Duration::from_millis(10));
+    }
+    s1.done();
     for i in (0..50).display_bar(bman.register_bar(bars::SimpleBar::new("Iterator".into(), ()))) {
         stati::println!(bman, "Progressed to {} with iterator", i);
         sleep(Duration::from_millis(50));

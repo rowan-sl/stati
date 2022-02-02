@@ -85,6 +85,9 @@ pub(crate) trait IsBarManagerInterface {
     fn display(&mut self) -> String;
 
     fn is_done(&self) -> bool;
+
+    fn close_method(&self) -> BarCloseMethod;
+
 }
 
 impl<T> IsBarManagerInterface for T
@@ -98,4 +101,9 @@ where
     fn is_done(&self) -> bool {
         <T as IsBar>::is_done(&self)
     }
+
+    fn close_method(&self) -> BarCloseMethod {
+        self.close_method()
+    }
+
 }
