@@ -98,6 +98,53 @@ impl<'bar> BarManager<'bar> {
         wrapped.into()
     }
 
+    // /// Formats the current progress bars, along with the text as messages
+    // /// that have been printed in this time, to a string.
+    // ///
+    // /// this assumes that nothing has been written to stdout in the time since it was last called, and as such
+    // /// you should not use `std::println!` or `std::print!` with this, and instead `stati::println!` or `stati::print!`
+    // /// 
+    // /// # Panics
+    // /// if it cannot borrow any of the contained bars
+    // #[cfg(feature = "nightly")]
+    // #[feature(drain_filter)]
+    // #[must_use]
+    // pub(crate) fn display(&mut self) -> String {
+    //     let mut res = String::new();
+    //     // ESC CSI n F (move to the start of the line n lines up)
+    //     // (this is to overwrite previous bars)
+    //     if self.last_lines != 0 {
+    //         res += &format!("\x1b[{}F", self.last_lines);
+    //     }
+    //     // ESC CSI 0 J (clears from cursor to end of screen)
+    //     res += "\x1b[0J";
+    //     // print stuff
+    //     for item in self.print_queue.drain(..) {
+    //         res += &item;
+    //     }
+    //     // res += text;
+    //     // go through all bars, removing ones that are done
+    //     let _ = self.bars.drain_filter(|b| {
+    //         let mut bref = b.borrow_mut();
+    //         if bref.is_done() {
+    //             match bref.close_method() {
+    //                 crate::BarCloseMethod::Clear => {}
+    //                 crate::BarCloseMethod::LeaveBehind => {
+    //                     res += &bref.display();
+    //                     res += "\n";
+    //                 }
+    //             }
+    //             true
+    //         } else {
+    //             res += &bref.display();
+    //             res += "\n";
+    //             false
+    //         }
+    //     });
+    //     self.last_lines = self.bars.len();
+    //     res
+    // }
+
     /// Formats the current progress bars, along with the text as messages
     /// that have been printed in this time, to a string.
     ///
@@ -106,6 +153,7 @@ impl<'bar> BarManager<'bar> {
     /// 
     /// # Panics
     /// if it cannot borrow any of the contained bars
+    #[must_use]
     pub(crate) fn display(&mut self) -> String {
         let mut res = String::new();
         // ESC CSI n F (move to the start of the line n lines up)
@@ -121,7 +169,7 @@ impl<'bar> BarManager<'bar> {
         }
         // res += text;
         // go through all bars, removing ones that are done
-        let _ = self.bars.drain_filter(|b| {
+        let mut bar_filterer = |b: &mut Rc<RefCell<dyn IsBarManagerInterface>>| {
             let mut bref = b.borrow_mut();
             if bref.is_done() {
                 match bref.close_method() {
@@ -137,7 +185,15 @@ impl<'bar> BarManager<'bar> {
                 res += "\n";
                 false
             }
-        });
+        };
+        let mut i = 0;
+        while i < self.bars.len() {
+            if bar_filterer(&mut self.bars[i]) {
+                let _ = self.bars.remove(i);
+            } else {
+                i += 1;
+            }
+        }
         self.last_lines = self.bars.len();
         res
     }

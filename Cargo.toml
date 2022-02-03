@@ -1,13 +1,13 @@
 [package]
 name = "stati"
-version = "0.6.3-beta"
+version = "0.6.4-beta"
 edition = "2021"
 license = "MIT"
 authors = ["Rowan S-L <rowan@fawkes.io>"]
 description = "A library for progress (bars)"
 repository = "https://github.com/rowan-sl/stati/"
 keywords = ["cli", "terminal", "bar", "progress"]
-catagories = ["command-line-interface"]
+categories = ["command-line-interface"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -17,7 +17,3 @@ termion = "1.5.6"
 [lib]
 name = "stati"
 path = "src/lib.rs"
-
-[[bin]]
-name = "stati-test"
-path = "src/main.rs"
