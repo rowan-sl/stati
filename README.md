@@ -53,7 +53,7 @@ and generaly make it much nicer to use.
 
 ## Lisence
 
-MIT, see [LISENCE](LICENSE)
+MIT, see [LICENSE](LICENSE)
 
 ## TODO's
 
