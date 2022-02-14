@@ -10,7 +10,7 @@ checksum = "565dbd88872dbe4cc8a46e527f26483c1d1f7afa6b884a3bd6cd893d4f98da74"
 
 [[package]]
 name = "stati"
-version = "0.6.5-beta"
+version = "0.6.6-beta"
 dependencies = [
  "terminal_size",
 ]

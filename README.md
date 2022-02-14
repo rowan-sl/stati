@@ -13,7 +13,7 @@ things may change at any time
 Add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.6.5-beta"
+stati = "0.6.6-beta"
 ```
 
 ## Usage
