@@ -1,6 +1,6 @@
 //! A library for progress (bars)
 
-extern crate termion;
+extern crate terminal_size;
 
 pub mod bars;
 pub(crate) mod isbar;
@@ -12,7 +12,7 @@ pub(crate) mod utils;
 pub(crate) mod wrapper;
 
 pub use isbar::subsets as bar_subsets;
+pub use isbar::BarCloseMethod;
 pub use isbar::IsBar;
 pub use manager::BarManager;
 pub use wrapper::BarWrapper;
-pub use isbar::BarCloseMethod;
