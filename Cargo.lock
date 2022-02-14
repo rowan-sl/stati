@@ -40,7 +40,7 @@ dependencies = [
 
 [[package]]
 name = "stati"
-version = "0.6.4-beta"
+version = "0.6.5-beta"
 dependencies = [
  "termion",
 ]

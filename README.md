@@ -9,10 +9,10 @@ as it is still very much in development.
 
 ## Installation
 
-Then add this line to your `Cargo.toml`
+Add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.6.4-beta"
+stati = "0.6.5-beta"
 ```
 
 ## Usage
@@ -66,3 +66,4 @@ MIT, see [LISENCE](LICENSE)
 - [ ] multithreading?
 - [ ] create bar style with string formatting like indicatif?
 - [ ] update to use Vec::drain_filter once it is stableized
+- [x] windows support
