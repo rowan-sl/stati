@@ -1,6 +1,6 @@
 [package]
 name = "stati"
-version = "0.6.6-beta"
+version = "0.7.0-beta"
 edition = "2021"
 license = "MIT"
 authors = ["Rowan S-L <rowan@fawkes.io>"]
@@ -13,6 +13,11 @@ categories = ["command-line-interface"]
 
 [dependencies]
 terminal_size = "0.1.17"
+parking_lot = "0.12.0"
+
+[features]
+default = ["fairness"]
+fairness = []
 
 [lib]
 name = "stati"

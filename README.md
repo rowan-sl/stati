@@ -13,7 +13,7 @@ things may change at any time
 Add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.6.6-beta"
+stati = "0.7.0-beta"
 ```
 
 ## Usage
@@ -28,7 +28,7 @@ extern crate stati;
 use stati::prelude::*;
 
 let mut manager = BarManager::new();
-let mut bar = manager.register_bar(bars::SimpleBar::new("Working...".into(), ()));
+let mut bar = manager.register_bar(bars::SimpleBar::new("Working...", ()));
 for i in 0..=100 {
     bar.set_progress(i);
     manager.print();
@@ -59,12 +59,12 @@ MIT, see [LICENSE](LICENSE)
 
 - [x] add fun spini spinner wheeeeeeeeeeeeeeeeee
 - [x] non-nightly support
+- [x] add builder pattern support for making progress bars
+- [x] multithreading!
+- [x] windows support
 - [ ] improve docs
 - [ ] improve tests
 - [ ] improve examples
-- [x] add builder pattern support for making progress bars
 - [ ] better iterator tracking
-- [ ] multithreading?
 - [ ] create bar style with string formatting like indicatif?
 - [ ] update to use Vec::drain_filter once it is stableized
-- [x] windows support

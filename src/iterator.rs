@@ -1,14 +1,18 @@
-use crate::{BarWrapper, IsBar};
+use std::any::Any;
+use std::fmt::Debug;
 
-pub struct ProgressTracker<I, B: IsBar> {
+use crate::{IsBar, wrapper::IsBarWrapper};
+
+
+pub struct ProgressTracker<I, E: Any, B: IsBar, W: IsBarWrapper<Bar = B, Error = E>> {
     iterator: I,
     items_count: usize,
     manual_hint: Option<usize>,
-    bar: BarWrapper<B>,
+    bar: W,
 }
 
-impl<I, B: IsBar> ProgressTracker<I, B> {
-    pub fn new(iter: I, bar: BarWrapper<B>) -> Self {
+impl<I, E: Any, B: IsBar, W: IsBarWrapper<Bar = B, Error = E>> ProgressTracker<I, E, B, W> {
+    pub fn new(iter: I, bar: W) -> Self {
         Self {
             iterator: iter,
             items_count: 0,
@@ -24,10 +28,12 @@ impl<I, B: IsBar> ProgressTracker<I, B> {
     }
 }
 
-impl<I, Ir, B> Iterator for ProgressTracker<I, B>
+impl<I, E, B, W, Ir> Iterator for ProgressTracker<I, E, B, W>
 where
     I: Iterator<Item = Ir>,
+    E: Any + Debug,
     B: IsBar<Progress = usize> + crate::bar_subsets::PrecentageBar,
+    W: IsBarWrapper<Bar = B, Error = E>,
 {
     type Item = Ir;
     fn next(&mut self) -> Option<Self::Item> {
@@ -47,7 +53,7 @@ where
             } else {
                 100
             }
-        );
+        ).unwrap();
         if let Some(i) = next {
             self.items_count += 1;
             Some(i)
@@ -62,10 +68,10 @@ pub trait ProgressTrackingAdaptor<T>: Iterator<Item = T> + Sized {
     /// displaying the iterators progress
     /// 
     /// currently VERY experimental, and WILL break, mainly with iterators that do not have a good size_hint function
-    fn display_bar<'bar, B: 'bar + IsBar + crate::bar_subsets::PrecentageBar>(
+    fn display_bar<'bar, B: 'bar + IsBar + crate::bar_subsets::PrecentageBar, E: Any, W: IsBarWrapper<Bar = B, Error = E>>(
         self,
-        bar: BarWrapper<B>
-    ) -> ProgressTracker<Self, B> {
+        bar: W
+    ) -> ProgressTracker<Self, E, B, W> {
         ProgressTracker::new(self, bar)
     }
 }

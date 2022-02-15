@@ -9,3 +9,4 @@
 
 pub use crate::iterator::ProgressTrackingAdaptor as __stati_ProgressTrackingAdaptor;
 pub use crate::IsBar as __stati_IsBar;
+pub use crate::IsBarWrapper as __stati_IsBarWrapper;

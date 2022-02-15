@@ -14,7 +14,7 @@ impl crate::isbar::IsBar for Spinni {
     type Progress = String;
     type Args = SpinniArgs;
 
-    fn new(job_name: String, args: Self::Args) -> Self
+    fn new(job_name: impl ToString, args: Self::Args) -> Self
     where
             Self: Sized {
         Self {
@@ -23,7 +23,7 @@ impl crate::isbar::IsBar for Spinni {
                 .collect(),
             current_char: 0,
             args,
-            job_name,
+            job_name: job_name.to_string(),
             done: false,
         }
     }

@@ -16,9 +16,10 @@ impl crate::IsBar for SimpleBar {
     type Progress = usize;
     type Args = ();
 
-    fn new(name: String, _: ()) -> Self {
+    fn new(name: impl ToString, _: ()) -> Self {
         Self {
             job_name: name
+                .to_string()
                 .chars()
                 .filter(|ch| ch != &'\n' || ch != &'\r')
                 .collect(),

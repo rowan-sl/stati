@@ -22,7 +22,7 @@ pub trait IsBar {
     /// and a progress level of zero
     ///
     /// [`Bar`]: IsBar
-    fn new(job_name: String, args: Self::Args) -> Self
+    fn new(job_name: impl ToString, args: Self::Args) -> Self
     where
         Self: Sized;
 
@@ -87,7 +87,6 @@ pub(crate) trait IsBarManagerInterface {
     fn is_done(&self) -> bool;
 
     fn close_method(&self) -> BarCloseMethod;
-
 }
 
 impl<T> IsBarManagerInterface for T
