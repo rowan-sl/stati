@@ -35,7 +35,7 @@ use stati::prelude::*;
 
 # fn main() {
 let mut manager = BarManager::new();
-let mut bar = manager.register_bar(stati::bars::SimpleBar::new("Working...", 100));
+let mut bar = manager.register(stati::bars::SimpleBar::new(&"Working...", 100));
 for i in 0..=100 {
     bar.bar().set_progress(i);
     manager.print();
@@ -55,7 +55,7 @@ use stati::prelude::*;
 
 # fn main() {
 let mut manager = BarManager::new();
-let mut bar = manager.register_bar(stati::bars::SimpleBar::new("Working...", 100));
+let mut bar = manager.register(stati::bars::SimpleBar::new(&"Working...", 100));
 for i in 0..=100 {
     bar.bar().set_progress(i);
     stati::println!(manager, "Progressed to {} in the first section", i);
