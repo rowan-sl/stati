@@ -39,6 +39,7 @@ fn main() {
         sleep(Duration::from_millis(50));
     }
     let mut b2 = bman.register(bars::SimpleBar::new(&"bar2", 100));
+    stati::println!(bman, "Debugging manager\n{:#?}", bman);
     for i in 0..=50 {
         b1.bar().set_progress(i + 50);
         b2.bar().set_progress(i);

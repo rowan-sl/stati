@@ -1,6 +1,7 @@
 use crate::{BarCloseMethod, IsBar};
 
 /// Spinny spinning spinner
+#[derive(Clone, Debug, Hash)]
 pub struct Spinni {
     tick_strings: Vec<char>,
     current_char: usize,
@@ -72,6 +73,7 @@ impl IsBar for Spinni {
     }
 }
 
+#[derive(Clone, Debug, Hash)]
 pub struct SpinniBuilder {
     job_name: String,
     task_name: String,

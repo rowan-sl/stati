@@ -19,7 +19,7 @@ use crate::isbar::IsBar;
 ///
 ///
 /// [`Bar`]: IsBar
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ThreadedBarWrapper<B: IsBar>(Arc<Mutex<B>>);
 
 impl<B: IsBar> IsBarWrapper for ThreadedBarWrapper<B> {

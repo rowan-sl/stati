@@ -1,4 +1,5 @@
 use core::cell::RefCell;
+use std::fmt::Debug;
 use std::{io::Write, rc::Rc};
 
 #[cfg(feature = "fairness")]
@@ -80,6 +81,7 @@ created with [`register`]
 [`register_threadsafe`]: BarManager::register_threadsafe
 [`register`]: BarManager::register
 */
+#[derive(Debug)]
 pub struct BarManager<'bar> {
     bars: Vec<Rc<RefCell<dyn IsBarManagerInterface + 'bar>>>,
     threaded_bars: Vec<Arc<Mutex<dyn IsBarManagerInterface + 'bar>>>,
@@ -106,7 +108,7 @@ impl<'bar> BarManager<'bar> {
     /// to register a bar so it can be used across threads, see [`register_threadsafe`]
     /// 
     /// [`register_threadsafe`]: Self::register_threadsafe
-    pub fn register<B: 'bar + IsBar>(&mut self, bar: B) -> BarWrapper<B> {
+    pub fn register<B: 'bar + IsBar + Debug>(&mut self, bar: B) -> BarWrapper<B> {
         let wrapped = Rc::new(RefCell::new(bar));
         self.bars.push(wrapped.clone());
         wrapped.into()
@@ -115,7 +117,7 @@ impl<'bar> BarManager<'bar> {
     /// Like [`register`], however the wrapper returned by this can be used across threads
     /// 
     /// [`register`]: Self::register
-    pub fn register_threadsafe<B: 'bar + IsBar>(&mut self, bar: B) -> ThreadedBarWrapper<B> {
+    pub fn register_threadsafe<B: 'bar + IsBar + Debug>(&mut self, bar: B) -> ThreadedBarWrapper<B> {
         let wrapped = Arc::new(Mutex::new(bar));
         self.threaded_bars.push(wrapped.clone());
         wrapped.into()

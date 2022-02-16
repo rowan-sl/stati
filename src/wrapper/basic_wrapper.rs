@@ -12,7 +12,7 @@ use crate::isbar::IsBar;
 /// so it may not have been called. if you want to check this, call `done()` manually
 ///
 /// [`Bar`]: IsBar
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BarWrapper<B: IsBar>(Rc<RefCell<B>>);
 
 impl<B: IsBar> IsBarWrapper for BarWrapper<B> {

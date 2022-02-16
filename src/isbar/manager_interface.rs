@@ -1,6 +1,8 @@
+use std::fmt::Debug;
+
 use super::{BarCloseMethod, IsBar};
 
-pub trait IsBarManagerInterface {
+pub trait IsBarManagerInterface: Debug {
     fn display(&mut self) -> String;
 
     fn is_done(&self) -> bool;
@@ -10,7 +12,7 @@ pub trait IsBarManagerInterface {
 
 impl<T> IsBarManagerInterface for T
 where
-    T: IsBar,
+    T: IsBar + Debug,
 {
     fn display(&mut self) -> String {
         <T as IsBar>::display(self)

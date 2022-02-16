@@ -6,6 +6,7 @@ const UNIT: &str = "%";
 
 /// A simple progress bar implementation, based off that of
 /// the progress crates progresbar
+#[derive(Clone, Debug, Hash)]
 pub struct SimpleBar {
     job_name: String,
     precentage: usize,

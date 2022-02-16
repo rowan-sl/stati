@@ -3,6 +3,7 @@ use std::fmt::Debug;
 
 use crate::{bar_subsets::IteratorProgress, wrapper::IsBarWrapper, IsBar};
 
+#[derive(Debug)]
 pub struct ProgressTracker<I, E: Any, B: IsBar, W: IsBarWrapper<Bar = B, Error = E>> {
     iterator: I,
     items_count: usize,
