@@ -1,33 +1,56 @@
 use crate::{BarCloseMethod, IsBar};
 
-
 /// Spinny spinning spinner
 pub struct Spinni {
     tick_strings: Vec<char>,
     current_char: usize,
-    args: SpinniArgs,
     job_name: String,
+    subtask: String,
     done: bool,
+    close_method: BarCloseMethod,
+    tick_on_display: bool,
 }
 
-impl crate::isbar::IsBar for Spinni {
-    type Progress = String;
-    type Args = SpinniArgs;
-
-    fn new(job_name: impl ToString, args: Self::Args) -> Self
+impl Spinni {
+    pub(crate) fn new(
+        job_name: String,
+        subtask: String,
+        close_method: BarCloseMethod,
+        tick_on_display: bool,
+    ) -> Self
     where
-            Self: Sized {
+        Self: Sized,
+    {
         Self {
-            tick_strings: "⠁⠁⠉⠙⠚⠒⠂⠂⠒⠲⠴⠤⠄⠄⠤⠠⠠⠤⠦⠖⠒⠐⠐⠒⠓⠋⠉⠈⠈ "
-                .chars()
-                .collect(),
+            tick_strings: "⠁⠁⠉⠙⠚⠒⠂⠂⠒⠲⠴⠤⠄⠄⠤⠠⠠⠤⠦⠖⠒⠐⠐⠒⠓⠋⠉⠈⠈ ".chars().collect(),
             current_char: 0,
-            args,
-            job_name: job_name.to_string(),
+            job_name,
+            subtask,
             done: false,
+            close_method,
+            tick_on_display,
         }
     }
 
+    pub fn set_job(&mut self, job_name: String) {
+        self.job_name = job_name;
+    }
+
+    pub fn set_subtask(&mut self, task_name: String) {
+        self.subtask = task_name;
+    }
+
+    /// spin the wheel
+    pub fn tick(&mut self) {
+        if self.current_char == self.tick_strings.len() - 1 {
+            self.current_char = 0;
+        } else {
+            self.current_char += 1;
+        }
+    }
+}
+
+impl IsBar for Spinni {
     fn done(&mut self) {
         self.done = true;
     }
@@ -36,62 +59,63 @@ impl crate::isbar::IsBar for Spinni {
         self.done
     }
 
-    /// In this case, it just updates the current task name and ticks it,
-    /// only update name if progress is Some
-    fn set_progress(&mut self, progress: Self::Progress) {
-        self.args.current_task_name = progress;
-    }
-
-    fn set_name(&mut self, job_name: String) {
-        self.job_name = job_name;
-    }
-
     fn close_method(&self) -> crate::BarCloseMethod {
-        self.args.close_method
+        self.close_method
     }
 
     fn display(&mut self) -> String {
-        if self.current_char == self.tick_strings.len()-1 {
-            self.current_char = 0;
-        } else {
-            self.current_char += 1;
+        if self.tick_on_display {
+            self.tick();
         }
         let spini_step = self.tick_strings[self.current_char];
-        format!("{} {}: {}", spini_step, self.job_name, self.args.current_task_name)
+        format!("{} {}: {}", spini_step, self.job_name, self.subtask)
     }
-}
-
-pub struct SpinniArgs {
-    current_task_name: String,
-    close_method: BarCloseMethod,
 }
 
 pub struct SpinniBuilder {
     job_name: String,
     task_name: String,
     close_method: BarCloseMethod,
+    tick_on_display: bool,
 }
 
 impl SpinniBuilder {
+    #[must_use]
     pub fn new(name: String) -> Self {
         Self {
             job_name: name,
             task_name: "".into(),
             close_method: BarCloseMethod::LeaveBehind,
+            tick_on_display: true,
         }
     }
 
+    #[must_use]
+    #[allow(clippy::missing_const_for_fn)]//you are WRONG
     pub fn task_name(mut self, task_name: String) -> Self {
         self.task_name = task_name;
         self
     }
 
-    pub fn close_method(mut self, close_method: BarCloseMethod) -> Self {
+    #[must_use]
+    pub const fn close_method(mut self, close_method: BarCloseMethod) -> Self {
         self.close_method = close_method;
         self
     }
 
+    #[must_use]
+    pub const fn tick_on_display(mut self, tick_on_display: bool) -> Self {
+        self.tick_on_display = tick_on_display;
+        self
+    }
+
+    #[must_use]
     pub fn build(self) -> Spinni {
-        Spinni::new(self.job_name, SpinniArgs {current_task_name: self.task_name, close_method: self.close_method})
+        Spinni::new(
+            self.job_name,
+            self.task_name,
+            self.close_method,
+            self.tick_on_display,
+        )
     }
 }

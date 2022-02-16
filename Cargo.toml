@@ -1,6 +1,6 @@
 [package]
 name = "stati"
-version = "0.7.0-beta"
+version = "0.8.0-beta"
 edition = "2021"
 license = "MIT"
 authors = ["Rowan S-L <rowan@fawkes.io>"]
@@ -19,6 +19,7 @@ parking_lot = "0.12.0"
 default = ["fairness"]
 fairness = []
 
-[lib]
-name = "stati"
-path = "src/lib.rs"
+[workspace]
+members = [
+    "stati-testing"
+]

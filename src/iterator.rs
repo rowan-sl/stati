@@ -1,8 +1,7 @@
 use std::any::Any;
 use std::fmt::Debug;
 
-use crate::{IsBar, wrapper::IsBarWrapper};
-
+use crate::{bar_subsets::IteratorProgress, wrapper::IsBarWrapper, IsBar};
 
 pub struct ProgressTracker<I, E: Any, B: IsBar, W: IsBarWrapper<Bar = B, Error = E>> {
     iterator: I,
@@ -21,7 +20,7 @@ impl<I, E: Any, B: IsBar, W: IsBarWrapper<Bar = B, Error = E>> ProgressTracker<I
         }
     }
 
-    /// Applies a manual size_hint to the progress bar tracker, to fix broken progress bars
+    /// Applies a manual size hint to the progress bar tracker, to fix broken progress bars
     pub fn manual_hint(&mut self, hint: usize) -> &mut Self {
         self.manual_hint = Some(hint);
         self
@@ -32,28 +31,26 @@ impl<I, E, B, W, Ir> Iterator for ProgressTracker<I, E, B, W>
 where
     I: Iterator<Item = Ir>,
     E: Any + Debug,
-    B: IsBar<Progress = usize> + crate::bar_subsets::PrecentageBar,
+    B: IsBar + IteratorProgress,
     W: IsBarWrapper<Bar = B, Error = E>,
 {
     type Item = Ir;
     fn next(&mut self) -> Option<Self::Item> {
         let next = self.iterator.next();
         let (lower, upper) = self.iterator.size_hint();
-        self.bar.set_progress(
-            if next.is_some() {
-                if let Some(hint) = self.manual_hint {
-                    (100 * self.items_count) / hint
-                } else {
-                    (100 * self.items_count)
-                    / std::cmp::max(
-                        self.items_count,
-                        self.items_count + std::cmp::max(lower, upper.unwrap_or(0)),
-                    )
-                }
+
+        self.bar.bar().set_progress(self.items_count);
+        self.bar
+            .bar()
+            .set_size_hint(if let Some(hint) = self.manual_hint {
+                hint
             } else {
-                100
-            }
-        ).unwrap();
+                std::cmp::max(
+                    self.items_count,
+                    self.items_count + std::cmp::max(lower, upper.unwrap_or(0)),
+                )
+            });
+
         if let Some(i) = next {
             self.items_count += 1;
             Some(i)
@@ -66,11 +63,18 @@ where
 pub trait ProgressTrackingAdaptor<T>: Iterator<Item = T> + Sized {
     /// Takes controll of a progress bar (or finishes a builder),
     /// displaying the iterators progress
+    ///
+    /// currently VERY experimental, and WILL break, mainly with iterators that do not have a good [`size_hint`] function
     /// 
-    /// currently VERY experimental, and WILL break, mainly with iterators that do not have a good size_hint function
-    fn display_bar<'bar, B: 'bar + IsBar + crate::bar_subsets::PrecentageBar, E: Any, W: IsBarWrapper<Bar = B, Error = E>>(
+    /// [`size_hint`]: std::iter::Iterator::size_hint
+    fn display_bar<
+        'bar,
+        B: 'bar + IsBar + crate::bar_subsets::IteratorProgress,
+        E: Any,
+        W: IsBarWrapper<Bar = B, Error = E>,
+    >(
         self,
-        bar: W
+        bar: W,
     ) -> ProgressTracker<Self, E, B, W> {
         ProgressTracker::new(self, bar)
     }

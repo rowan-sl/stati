@@ -9,14 +9,15 @@ const UNIT: &str = "%";
 pub struct SimpleBar {
     job_name: String,
     precentage: usize,
+    max_hint: usize,
     finished: bool,
 }
 
-impl crate::IsBar for SimpleBar {
-    type Progress = usize;
-    type Args = ();
-
-    fn new(name: impl ToString, _: ()) -> Self {
+impl SimpleBar {
+    /// name: the name of the job
+    ///
+    /// hint: hint for the maximum value this will reach
+    pub fn new(name: &impl ToString, hint: usize) -> Self {
         Self {
             job_name: name
                 .to_string()
@@ -24,24 +25,23 @@ impl crate::IsBar for SimpleBar {
                 .filter(|ch| ch != &'\n' || ch != &'\r')
                 .collect(),
             precentage: 0,
+            max_hint: hint,
             finished: false,
         }
     }
 
+    pub fn set_name(&mut self, job_name: String) {
+        self.job_name = job_name;
+    }
+}
+
+impl crate::IsBar for SimpleBar {
     fn done(&mut self) {
         self.finished = true;
     }
 
     fn is_done(&self) -> bool {
         self.finished
-    }
-
-    fn set_progress(&mut self, progress: Self::Progress) {
-        self.precentage = progress;
-    }
-
-    fn set_name(&mut self, job_name: String) {
-        self.job_name = job_name;
     }
 
     /// Some implementation details:
@@ -51,7 +51,7 @@ impl crate::IsBar for SimpleBar {
     ///  if it cannot get the real term size, uses 81 as the size
     fn display(&mut self) -> String {
         //TODO make this not use default
-        let width = crate::utils::term_width().unwrap_or(81) as i32;
+        let width = crate::utils::term_width().unwrap_or(81);
 
         let mut res =
             String::with_capacity(width as usize /* starts out as a u16, so its fine */);
@@ -59,7 +59,7 @@ impl crate::IsBar for SimpleBar {
         let overhead = self.precentage / 100;
         let left_percentage = self.precentage - overhead * 100;
         let bar_len = width - (50 + 5) - 2;
-        let bar_finished_len = ((bar_len as f32) * (left_percentage as f32 / 100.0)) as i32;
+        let bar_finished_len = (bar_len as f32 * left_percentage as f32 / 100.0) as i32;
         let filled_symbol = if overhead & 0b1 == 0 { FILLED } else { EMPTY };
         let empty_symbol = if overhead & 0b1 == 0 { EMPTY } else { FILLED };
 
@@ -71,7 +71,7 @@ impl crate::IsBar for SimpleBar {
         for _ in 0..bar_finished_len {
             res += filled_symbol;
         }
-        for _ in bar_finished_len..bar_len {
+        for _ in bar_finished_len..i32::from(bar_len) {
             res += empty_symbol;
         }
         res += END;
@@ -88,4 +88,12 @@ impl crate::IsBar for SimpleBar {
     }
 }
 
-impl crate::bar_subsets::PrecentageBarFlag for SimpleBar {}
+impl crate::bar_subsets::IteratorProgress for SimpleBar {
+    fn set_progress(&mut self, progress: usize) {
+        self.precentage = progress;
+    }
+
+    fn set_size_hint(&mut self, hint: usize) {
+        self.max_hint = hint;
+    }
+}

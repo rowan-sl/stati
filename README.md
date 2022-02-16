@@ -13,7 +13,7 @@ things may change at any time
 Add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.7.0-beta"
+stati = "0.8.0-beta"
 ```
 
 ## Usage
@@ -26,11 +26,12 @@ use std::thread;
 extern crate stati;
 
 use stati::prelude::*;
+use stati::BarManager;
 
 let mut manager = BarManager::new();
-let mut bar = manager.register_bar(bars::SimpleBar::new("Working...", ()));
+let mut bar = manager.register(bars::SimpleBar::new(&"Working...", 100));
 for i in 0..=100 {
-    bar.set_progress(i);
+    bar.bar().set_progress(i);
     manager.print();
     thread::sleep_ms(100);
 }

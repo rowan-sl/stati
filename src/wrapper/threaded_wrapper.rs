@@ -1,22 +1,23 @@
-use std::sync::Arc;
 #[cfg(feature = "fairness")]
 use parking_lot::FairMutex as Mutex;
 #[cfg(not(feature = "fairness"))]
 use parking_lot::Mutex;
+use std::ops::DerefMut;
+use std::sync::Arc;
 
-use crate::isbar::IsBar;
 use super::IsBarWrapper;
-
+use crate::isbar::IsBar;
 
 /// a wrapper around a [`Bar`], allowing the manager to keep a copy while
 /// passing one to the user
-/// 
+///
 /// this one is thread-safe!
 ///
 /// when this is dropped, `done()` *should* be called,
 /// however it does not check if it succedded or not to avoid panicking,
 /// so it may not have been called. if you want to check this, call `done()` manually
-/// 
+///
+///
 /// [`Bar`]: IsBar
 #[derive(Clone)]
 pub struct ThreadedBarWrapper<B: IsBar>(Arc<Mutex<B>>);
@@ -24,25 +25,21 @@ pub struct ThreadedBarWrapper<B: IsBar>(Arc<Mutex<B>>);
 impl<B: IsBar> IsBarWrapper for ThreadedBarWrapper<B> {
     type Bar = B;
     type Error = ();
-    /// Sets the progress of the bar. for more info, see [`IsBar::set_progress`]
-    fn set_progress(&mut self, progress: B::Progress) -> Result<(), ()>{
-        self.0.lock().set_progress(progress);
-        Ok(())
+
+    fn try_bar<'b>(&'b mut self) -> Result<Box<dyn DerefMut<Target = Self::Bar> + 'b>, ()> {
+        Ok(Box::new(self.0.lock()))
     }
 
-    /// Sets the job name of the bar. for more info, see [`IsBar::set_name`]
-    fn set_name(&mut self, job_name: String) -> Result<(), ()> {
-        self.0.lock().set_name(job_name);
-        Ok(())
-    }
-
-    /// Indicates that the bar has finished, and can be finalized and dropped by the manager.
-    /// for more info, see [`IsBar::done`]
+    /// Get a reference to the underlying bar.
     ///
-    /// this is also called by the [`Drop`] impl on this type
-    fn done(&mut self) -> Result<(), ()> {
-        self.0.lock().done();
-        Ok(())
+    /// warning! **DO NOT** call this twice without dropping
+    /// the first reference returned, this will cause a deadlock!
+    ///
+    /// for a non-panicking alternative, see [`try_bar`]
+    /// 
+    /// [`try_bar`]: ThreadedBarWrapper::try_bar
+    fn bar<'b>(&'b mut self) -> Box<dyn DerefMut<Target = Self::Bar> + 'b> {
+        self.try_bar().unwrap()
     }
 }
 
