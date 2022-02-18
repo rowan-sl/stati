@@ -1,8 +1,14 @@
 //! A library for easy to use and configurable cli progress bars
 //!
 //! ## Features
-//! fairness: enables using `parking_lot`'s `FairMutex`
-//! (adds some overhead but may fix some issues?)
+//! - fairness: 
+//!   - enables using `parking_lot`'s `FairMutex`
+//!   - (adds some overhead but may fix some issues?)
+//! - nightly:
+//!   - enables using nighlty rust (generic_associated_types) for some extra optimizations
+//! 
+
+#![cfg_attr(feature = "nightly", feature(generic_associated_types))]
 
 extern crate parking_lot;
 extern crate terminal_size;

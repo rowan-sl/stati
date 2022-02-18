@@ -2,7 +2,6 @@
 use parking_lot::FairMutex as Mutex;
 #[cfg(not(feature = "fairness"))]
 use parking_lot::Mutex;
-use std::ops::DerefMut;
 use std::sync::Arc;
 
 use super::IsBarWrapper;
@@ -22,6 +21,9 @@ use crate::isbar::IsBar;
 #[derive(Clone, Debug)]
 pub struct ThreadedBarWrapper<B: IsBar>(Arc<Mutex<B>>);
 
+#[cfg(not(feature = "nightly"))]
+use std::ops::DerefMut;
+#[cfg(not(feature = "nightly"))]
 impl<B: IsBar> IsBarWrapper for ThreadedBarWrapper<B> {
     type Bar = B;
     type Error = ();
@@ -39,6 +41,31 @@ impl<B: IsBar> IsBarWrapper for ThreadedBarWrapper<B> {
     /// 
     /// [`try_bar`]: ThreadedBarWrapper::try_bar
     fn bar<'b>(&'b mut self) -> Box<dyn DerefMut<Target = Self::Bar> + 'b> {
+        self.try_bar().unwrap()
+    }
+}
+
+#[cfg(feature = "nightly")]
+use parking_lot::{RawFairMutex, lock_api::MutexGuard};
+#[cfg(feature = "nightly")]
+impl<B: IsBar> IsBarWrapper for ThreadedBarWrapper<B> {
+    type Bar = B;
+    type Error = ();
+    type BarGuard<'g> where Self: 'g = MutexGuard<'g, RawFairMutex, Self::Bar>;
+
+    fn try_bar<'g>(&'g mut self) -> Result<Self::BarGuard<'g>, ()> {
+        Ok(self.0.lock())
+    }
+
+    /// Get a reference to the underlying bar.
+    ///
+    /// warning! **DO NOT** call this twice without dropping
+    /// the first reference returned, this will cause a deadlock!
+    ///
+    /// for a non-panicking alternative, see [`try_bar`]
+    /// 
+    /// [`try_bar`]: ThreadedBarWrapper::try_bar
+    fn bar<'g>(&'g mut self) -> Self::BarGuard<'g> {
         self.try_bar().unwrap()
     }
 }

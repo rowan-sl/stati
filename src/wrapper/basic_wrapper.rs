@@ -1,8 +1,13 @@
 use core::cell::RefCell;
-use std::{cell::BorrowMutError, ops::DerefMut, rc::Rc};
-
-use super::IsBarWrapper;
+use std::rc::Rc;
 use crate::isbar::IsBar;
+use super::IsBarWrapper;
+use std::cell::BorrowMutError;
+#[cfg(not(feature = "nightly"))]
+use std::ops::DerefMut;
+#[cfg(feature = "nightly")]
+use std::cell::RefMut;
+
 
 /// a wrapper around a [`Bar`], allowing the manager to keep a copy while
 /// passing one to the user
@@ -15,6 +20,7 @@ use crate::isbar::IsBar;
 #[derive(Clone, Debug)]
 pub struct BarWrapper<B: IsBar>(Rc<RefCell<B>>);
 
+#[cfg(not(feature = "nightly"))]
 impl<B: IsBar> IsBarWrapper for BarWrapper<B> {
     type Bar = B;
     type Error = BorrowMutError;
@@ -22,6 +28,17 @@ impl<B: IsBar> IsBarWrapper for BarWrapper<B> {
         &'b mut self,
     ) -> Result<Box<dyn DerefMut<Target = Self::Bar> + 'b>, BorrowMutError> {
         Ok(Box::new(self.0.try_borrow_mut()?))
+    }
+}
+#[cfg(feature = "nightly")]
+impl<B: IsBar> IsBarWrapper for BarWrapper<B> {
+    type Bar = B;
+    type Error = BorrowMutError;
+    type BarGuard<'g>  where Self: 'g = RefMut<'g, Self::Bar>;
+    fn try_bar<'g>(
+        &'g mut self,
+    ) -> Result<Self::BarGuard<'g>, BorrowMutError> {
+        self.0.try_borrow_mut()
     }
 }
 

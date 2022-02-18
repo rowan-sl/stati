@@ -75,7 +75,7 @@ checksum = "f2dd574626839106c320a323308629dcb1acfc96e32a8cba364ddc61ac23ee83"
 
 [[package]]
 name = "stati"
-version = "0.8.1-beta"
+version = "0.9.0-beta"
 dependencies = [
  "parking_lot",
  "terminal_size",

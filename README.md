@@ -8,12 +8,20 @@ This crate is still in development,
 and although it should be fine to use,
 things may change at any time
 
+## Crate Features
+
+- fairness:
+  - enables using `parking_lot`'s `FairMutex`
+  - (adds some overhead but may fix some issues?)
+- nightly:
+  - enables using nighlty rust (generic_associated_types) for some extra optimizations
+
 ## Installation
 
 Add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.8.1-beta"
+stati = "0.9.0-beta"
 ```
 
 ## Usage
@@ -60,6 +68,7 @@ MIT, see [LICENSE](LICENSE)
 
 - [x] add fun spini spinner wheeeeeeeeeeeeeeeeee
 - [x] non-nightly support
+- [x] add optional nightly features
 - [x] add builder pattern support for making progress bars
 - [x] multithreading!
 - [x] windows support

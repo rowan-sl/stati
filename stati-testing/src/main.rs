@@ -27,7 +27,7 @@ fn main() {
         sleep(Duration::from_millis(10));
     }
     s1.bar().done();
-    for i in (0..50).display_bar(bman.register(bars::SimpleBar::new(&"Iterator", 50))) {
+    for i in (0..=100).display_bar(bman.register(bars::SimpleBar::new(&"Iterator", 50))) {
         stati::println!(bman, "Progressed to {} with iterator", i);
         sleep(Duration::from_millis(50));
     }
@@ -71,4 +71,6 @@ fn main() {
     }
 
     h.join().unwrap();
+
+    stati::println!(bman, "done!");
 }
