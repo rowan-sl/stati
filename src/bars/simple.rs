@@ -57,12 +57,9 @@ impl crate::IsBar for SimpleBar {
         let mut res =
             String::with_capacity(width as usize /* starts out as a u16, so its fine */);
 
-        let overhead = self.precentage / 100;
-        let left_percentage = self.precentage - overhead * 100;
+        let left_percentage = self.precentage * 100 / self.max_hint;
         let bar_len = width - (50 + 5) - 2;
         let bar_finished_len = (bar_len as f32 * left_percentage as f32 / 100.0) as i32;
-        let filled_symbol = if overhead & 0b1 == 0 { FILLED } else { EMPTY };
-        let empty_symbol = if overhead & 0b1 == 0 { EMPTY } else { FILLED };
 
         res += "\r";
 
@@ -70,10 +67,10 @@ impl crate::IsBar for SimpleBar {
         res += &format!("{:<50}", self.job_name);
         res += START;
         for _ in 0..bar_finished_len {
-            res += filled_symbol;
+            res += FILLED;
         }
         for _ in bar_finished_len..i32::from(bar_len) {
-            res += empty_symbol;
+            res += EMPTY;
         }
         res += END;
 
