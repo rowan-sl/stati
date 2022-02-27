@@ -9,5 +9,5 @@
 
 pub use crate::isbar::subsets::IteratorProgress as __stati_IteratorProgress;
 pub use crate::iterator::ProgressTrackingAdaptor as __stati_ProgressTrackingAdaptor;
-pub use crate::IsBar as __stati_IsBar;
 pub use crate::wrapper::IsBarWrapper as __stati_IsBarWrapper;
+pub use crate::IsBar as __stati_IsBar;

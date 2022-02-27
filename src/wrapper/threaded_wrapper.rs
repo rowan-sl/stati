@@ -39,7 +39,7 @@ impl<B: IsBar> IsBarWrapper for ThreadedBarWrapper<B> {
     /// the first reference returned, this will cause a deadlock!
     ///
     /// for a non-panicking alternative, see [`try_bar`]
-    /// 
+    ///
     /// [`try_bar`]: ThreadedBarWrapper::try_bar
     fn bar<'b>(&'b mut self) -> Box<dyn DerefMut<Target = Self::Bar> + 'b> {
         self.try_bar().unwrap()
@@ -47,12 +47,15 @@ impl<B: IsBar> IsBarWrapper for ThreadedBarWrapper<B> {
 }
 
 #[cfg(feature = "nightly")]
-use parking_lot::{RawFairMutex, lock_api::MutexGuard};
+use parking_lot::{lock_api::MutexGuard, RawFairMutex};
 #[cfg(feature = "nightly")]
 impl<B: IsBar> IsBarWrapper for ThreadedBarWrapper<B> {
     type Bar = B;
     type Error = ();
-    type BarGuard<'g> where Self: 'g = MutexGuard<'g, RawFairMutex, Self::Bar>;
+    type BarGuard<'g>
+    where
+        Self: 'g,
+    = MutexGuard<'g, RawFairMutex, Self::Bar>;
 
     fn try_bar<'g>(&'g mut self) -> Result<Self::BarGuard<'g>, ()> {
         Ok(self.0.lock())
@@ -64,7 +67,7 @@ impl<B: IsBar> IsBarWrapper for ThreadedBarWrapper<B> {
     /// the first reference returned, this will cause a deadlock!
     ///
     /// for a non-panicking alternative, see [`try_bar`]
-    /// 
+    ///
     /// [`try_bar`]: ThreadedBarWrapper::try_bar
     fn bar<'g>(&'g mut self) -> Self::BarGuard<'g> {
         self.try_bar().unwrap()

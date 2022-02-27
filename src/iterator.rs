@@ -66,7 +66,7 @@ pub trait ProgressTrackingAdaptor<T>: Iterator<Item = T> + Sized {
     /// displaying the iterators progress
     ///
     /// currently VERY experimental, and WILL break, mainly with iterators that do not have a good [`size_hint`] function
-    /// 
+    ///
     /// [`size_hint`]: std::iter::Iterator::size_hint
     fn display_bar<
         'bar,

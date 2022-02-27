@@ -4,7 +4,7 @@ pub mod subsets;
 pub use manager_interface::IsBarManagerInterface;
 
 /// How the bar is handled when it is completed ([`done`] is called)
-/// 
+///
 /// [`done`]: IsBar::done
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum BarCloseMethod {
@@ -15,7 +15,7 @@ pub enum BarCloseMethod {
     Clear,
 }
 
-/// Basic API of a progress bar, 
+/// Basic API of a progress bar,
 /// providing methods required for all progress bars
 ///
 /// this does NOT encompass all things a bar needs, and you **should** add more methods
@@ -41,9 +41,9 @@ pub trait IsBar {
     fn display(&mut self) -> String;
 
     /// Returns how the bar should be handled by the [`BarManager`] after [`done`] is called
-    /// 
+    ///
     /// this is for internal use
-    /// 
+    ///
     /// [`done`]: IsBar::done
     /// [`BarManager`]: crate::manager::BarManager
     fn close_method(&self) -> BarCloseMethod;

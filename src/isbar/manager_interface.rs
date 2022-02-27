@@ -3,10 +3,10 @@ use std::fmt::Debug;
 use super::{BarCloseMethod, IsBar};
 
 /// Internal interface for a progress bar, which is held by [`BarManager`]
-/// 
+///
 /// All methods here forward to the respective methods on the underlying [`IsBar`] implementation
-/// 
-/// [`BarManager`]: crate::manager::BarManager 
+///
+/// [`BarManager`]: crate::manager::BarManager
 /// [`IsBar`]: crate::isbar::IsBar
 pub trait IsBarManagerInterface: Debug {
     fn display(&mut self) -> String;

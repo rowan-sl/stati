@@ -93,7 +93,7 @@ impl SpinniBuilder {
     }
 
     #[must_use]
-    #[allow(clippy::missing_const_for_fn)]//you are WRONG
+    #[allow(clippy::missing_const_for_fn)] //you are WRONG
     pub fn task_name(mut self, task_name: String) -> Self {
         self.task_name = task_name;
         self

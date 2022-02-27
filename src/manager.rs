@@ -9,7 +9,7 @@ use parking_lot::Mutex;
 use std::sync::Arc;
 
 use crate::isbar::{IsBar, IsBarManagerInterface};
-use crate::wrapper::{ThreadedBarWrapper, BarWrapper};
+use crate::wrapper::{BarWrapper, ThreadedBarWrapper};
 
 /**
 Manager for all current progress bars and text output.
@@ -104,9 +104,9 @@ impl<'bar> BarManager<'bar> {
     /// Registers a progress bar with the bar manager, to be drawn with the manager.
     /// Returns what is effectively a reference to it, and when that refference is dropped or `.done()` is called,
     /// the bar is finished, and is completed according to `bar.close_method()`
-    /// 
+    ///
     /// to register a bar so it can be used across threads, see [`register_threadsafe`]
-    /// 
+    ///
     /// [`register_threadsafe`]: Self::register_threadsafe
     pub fn register<B: 'bar + IsBar + Debug>(&mut self, bar: B) -> BarWrapper<B> {
         let wrapped = Rc::new(RefCell::new(bar));
@@ -115,9 +115,12 @@ impl<'bar> BarManager<'bar> {
     }
 
     /// Like [`register`], however the wrapper returned by this can be used across threads
-    /// 
+    ///
     /// [`register`]: Self::register
-    pub fn register_threadsafe<B: 'bar + IsBar + Debug>(&mut self, bar: B) -> ThreadedBarWrapper<B> {
+    pub fn register_threadsafe<B: 'bar + IsBar + Debug>(
+        &mut self,
+        bar: B,
+    ) -> ThreadedBarWrapper<B> {
         let wrapped = Arc::new(Mutex::new(bar));
         self.threaded_bars.push(wrapped.clone());
         wrapped.into()
@@ -206,7 +209,7 @@ impl<'bar> BarManager<'bar> {
 
     /// Attempts to flush the output, returning if it was sucsessfull or not
     #[allow(clippy::missing_errors_doc)]
-    #[allow(clippy::unused_self)]//it may be used in the future
+    #[allow(clippy::unused_self)] //it may be used in the future
     pub fn try_flush(&mut self) -> std::io::Result<()> {
         std::io::stdout().flush()
     }
@@ -242,7 +245,7 @@ impl<'bar> BarManager<'bar> {
     }
 
     /// Attempts to print and flush stdout
-    /// 
+    ///
     /// # Errors
     /// if stdout could not be flushed
     pub fn try_print(&mut self) -> std::io::Result<()> {
