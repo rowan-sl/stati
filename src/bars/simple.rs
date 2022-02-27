@@ -9,7 +9,7 @@ const UNIT: &str = "%";
 #[derive(Clone, Debug, Hash)]
 pub struct SimpleBar {
     job_name: String,
-    precentage: usize,
+    progress: usize,
     max_hint: usize,
     finished: bool,
 }
@@ -18,14 +18,14 @@ impl SimpleBar {
     /// name: the name of the job
     ///
     /// hint: hint for the maximum value this will reach
-    pub fn new(name: &impl ToString, hint: usize) -> Self {
+    pub fn new(name: impl ToString, hint: usize) -> Self {
         Self {
             job_name: name
                 .to_string()
                 .chars()
                 .filter(|ch| ch != &'\n' || ch != &'\r')
                 .collect(),
-            precentage: 0,
+            progress: 0,
             max_hint: hint,
             finished: false,
         }
@@ -57,9 +57,9 @@ impl crate::IsBar for SimpleBar {
         let mut res =
             String::with_capacity(width as usize /* starts out as a u16, so its fine */);
 
-        let left_percentage = self.precentage * 100 / self.max_hint;
+        let percentage = self.progress * 100 / self.max_hint;
         let bar_len = width - (50 + 5) - 2;
-        let bar_finished_len = (bar_len as f32 * left_percentage as f32 / 100.0) as i32;
+        let bar_finished_len = (bar_len as f32 * percentage as f32 / 100.0) as i32;
 
         res += "\r";
 
@@ -75,7 +75,7 @@ impl crate::IsBar for SimpleBar {
         res += END;
 
         //pad to 4 chars on left
-        res += &format!("{:>4}", self.precentage);
+        res += &format!("{:>4}", percentage);
         res += UNIT;
 
         res
@@ -88,7 +88,7 @@ impl crate::IsBar for SimpleBar {
 
 impl crate::subsets::IteratorProgress for SimpleBar {
     fn set_progress(&mut self, progress: usize) {
-        self.precentage = progress;
+        self.progress = progress;
     }
 
     fn set_size_hint(&mut self, hint: usize) {

@@ -21,7 +21,7 @@ things may change at any time
 Add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.10.1-beta"
+stati = "0.10.2-beta"
 ```
 
 ## Usage
