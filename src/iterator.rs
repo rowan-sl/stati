@@ -1,7 +1,7 @@
 use std::any::Any;
 use std::fmt::Debug;
 
-use crate::{bar_subsets::IteratorProgress, wrapper::IsBarWrapper, IsBar};
+use crate::{subsets::IteratorProgress, wrapper::IsBarWrapper, IsBar};
 
 #[derive(Debug)]
 pub struct ProgressTracker<I, E: Any, B: IsBar, W: IsBarWrapper<Bar = B, Error = E>> {
@@ -12,7 +12,7 @@ pub struct ProgressTracker<I, E: Any, B: IsBar, W: IsBarWrapper<Bar = B, Error =
 }
 
 impl<I, E: Any, B: IsBar, W: IsBarWrapper<Bar = B, Error = E>> ProgressTracker<I, E, B, W> {
-    pub fn new(iter: I, bar: W) -> Self {
+    pub(crate) fn new(iter: I, bar: W) -> Self {
         Self {
             iterator: iter,
             items_count: 0,
@@ -70,7 +70,7 @@ pub trait ProgressTrackingAdaptor<T>: Iterator<Item = T> + Sized {
     /// [`size_hint`]: std::iter::Iterator::size_hint
     fn display_bar<
         'bar,
-        B: 'bar + IsBar + crate::bar_subsets::IteratorProgress,
+        B: 'bar + IsBar + crate::subsets::IteratorProgress,
         E: Any,
         W: IsBarWrapper<Bar = B, Error = E>,
     >(

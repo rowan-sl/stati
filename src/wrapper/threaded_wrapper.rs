@@ -12,12 +12,13 @@ use crate::isbar::IsBar;
 ///
 /// this one is thread-safe!
 ///
-/// when this is dropped, `done()` *should* be called,
+/// when this is dropped, [`done`] *should* be called,
 /// however it does not check if it succedded or not to avoid panicking,
-/// so it may not have been called. if you want to check this, call `done()` manually
+/// so it may not have been called. if you want to check this, call [`done`] manually
 ///
 ///
 /// [`Bar`]: IsBar
+/// [`done`]: IsBar::done
 #[derive(Clone, Debug)]
 pub struct ThreadedBarWrapper<B: IsBar>(Arc<Mutex<B>>);
 

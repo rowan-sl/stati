@@ -21,7 +21,7 @@ things may change at any time
 Add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.9.1-beta"
+stati = "0.10.1-beta"
 ```
 
 ## Usage
@@ -72,7 +72,7 @@ MIT, see [LICENSE](LICENSE)
 - [x] add builder pattern support for making progress bars
 - [x] multithreading!
 - [x] windows support
-- [ ] improve docs
+- [x] improve docs
 - [ ] improve tests
 - [ ] improve examples
 - [ ] better iterator tracking

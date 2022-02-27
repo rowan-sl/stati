@@ -1,11 +1,15 @@
-/// Bars that accept a precentage for the Progress type (represented as usize)
-/// bars like this should generaly use 100% (`100usize`) for completed,
-///
-/// This should be implemented for types that fit these conditions and
-/// are ok to use as such
+/// simple API for use by the progress bar iterator [`ProgressTracker`]
+/// 
+/// [`ProgressTracker`]: crate::iterator::ProgressTracker
 pub trait IteratorProgress {
-    /// set items iterated through.
+    /// Sets the current progress (number of items iterated through)
     fn set_progress(&mut self, progress: usize);
-    /// set the hint for the maximum size
+
+    /// sets a hint for the maximum value [`set_progress`] will ever reach
+    /// 
+    /// implementations *should* be able to assume that any value passed to [`set_progress`]
+    /// is smaller or equal to the latest value passed to this
+    /// 
+    /// [`set_progress`]: IteratorProgress::set_progress
     fn set_size_hint(&mut self, max: usize);
 }

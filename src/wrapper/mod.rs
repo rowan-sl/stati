@@ -9,6 +9,7 @@ use crate::IsBar;
 pub use threaded_wrapper::ThreadedBarWrapper;
 pub use basic_wrapper::BarWrapper;
 
+/// General API for a bar wrappers used by [`ThreadedBarWrapper`] and [`BarWrapper`]
 #[allow(clippy::module_name_repetitions)]
 #[cfg(not(feature = "nightly"))]
 pub trait IsBarWrapper: crate::sealant::Sealed {
@@ -35,6 +36,7 @@ pub trait IsBarWrapper: crate::sealant::Sealed {
     }
 }
 
+/// General API for a bar wrappers used by [`ThreadedBarWrapper`] and [`BarWrapper`]
 #[allow(clippy::module_name_repetitions)]
 #[cfg(feature = "nightly")]
 pub trait IsBarWrapper: crate::sealant::Sealed {

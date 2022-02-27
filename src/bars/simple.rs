@@ -86,7 +86,7 @@ impl crate::IsBar for SimpleBar {
     }
 }
 
-impl crate::bar_subsets::IteratorProgress for SimpleBar {
+impl crate::subsets::IteratorProgress for SimpleBar {
     fn set_progress(&mut self, progress: usize) {
         self.precentage = progress;
     }

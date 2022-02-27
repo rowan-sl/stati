@@ -12,11 +12,12 @@ use std::cell::RefMut;
 /// a wrapper around a [`Bar`], allowing the manager to keep a copy while
 /// passing one to the user
 ///
-/// when this is dropped, `done()` *should* be called,
-/// however it does not check if it succedded or not to avoid panicking,
-/// so it may not have been called. if you want to check this, call `done()` manually
+/// When this is dropped, [`done`] *should* be called,
+/// however it does not check if it errors or not to avoid panicking,
+/// so it may not have sucseeded. if you want to check this, call [`done`] manually
 ///
 /// [`Bar`]: IsBar
+/// [`done`]: IsBar::done
 #[derive(Clone, Debug)]
 pub struct BarWrapper<B: IsBar>(Rc<RefCell<B>>);
 
@@ -30,6 +31,7 @@ impl<B: IsBar> IsBarWrapper for BarWrapper<B> {
         Ok(Box::new(self.0.try_borrow_mut()?))
     }
 }
+
 #[cfg(feature = "nightly")]
 impl<B: IsBar> IsBarWrapper for BarWrapper<B> {
     type Bar = B;
