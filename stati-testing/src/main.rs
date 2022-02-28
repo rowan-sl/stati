@@ -34,6 +34,22 @@ fn main() {
         stati::println!(bman, "Progressed to {} with iterator", i);
         sleep(Duration::from_millis(50));
     }
+    for i in (0..=200)
+        .display_bar(bman.register(
+            bars::custom::Builder::new("Custom Iterator")
+                .hint(200)
+                .start("<")
+                .filled("-")
+                .empty(" ")
+                .end(">")
+                .unit("iterations")
+                .build()
+        ))
+        .manual_hint(200)
+    {
+        stati::println!(bman, "Progressed to {} with iterator", i);
+        sleep(Duration::from_millis(50));
+    }
     let mut b1 = bman.register(bars::SimpleBar::new("bar1", 100));
     for i in 0..=50 {
         b1.bar().set_progress(i);

@@ -21,7 +21,7 @@ things may change at any time
 Add this line to your `Cargo.toml`
 
 ```toml
-stati = "0.10.2-beta"
+stati = "0.11.0-beta"
 ```
 
 ## Usage
@@ -78,3 +78,4 @@ MIT, see [LICENSE](LICENSE)
 - [ ] better iterator tracking
 - [ ] create bar style with string formatting like indicatif?
 - [ ] update to use Vec::drain_filter once it is stableized
+- [ ] make bars use better formatting
