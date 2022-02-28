@@ -1,4 +1,5 @@
 use std::time::Instant;
+use super::common::{TermSizeError, TermWidthError};
 
 mod default {
     pub const FILLED: &str = "=";
@@ -63,30 +64,35 @@ impl crate::IsBar for CustomBar {
     }
 
     #[must_use]
-    fn display(&mut self) -> String {
+    fn display(&mut self) -> Result<String, Box<dyn std::error::Error>> {
         let now = Instant::now();
         let time_fmt = format!("{:.3}", 1f32 / (now - self.last_iter).as_secs_f32());
         self.last_iter = now;
 
-        //TODO make this not use default
-        let width = crate::utils::term_width().unwrap_or(81) as usize;
+        let width = match crate::utils::term_width() {
+            Some(v) => {v},
+            None => {return Err(Box::new(TermWidthError))},
+        } as usize;
 
         let mut res = String::with_capacity(width);
 
         let percentage = self.progress * 100 / self.max_hint;
-        let bar_len = width.checked_sub(
-            self.job_name.len() +
-            1 /* gap */ +
-            1 /* bar start */ +
-            /* bar would go here */
-            1 /* bar end */ +
-            1 /* gap */ +
-            5 /* precent len */ +
-            1 /*gap*/ +
-            time_fmt.len() /* time amnt*/+
-            1 /*gap*/ +
-            self.elems.unit.len() + 2 /* unit len (___/s) */
-        ).unwrap();
+        let bar_len = match width.checked_sub(
+                    self.job_name.len() +
+                    1 /* gap */ +
+                    1 /* bar start */ +
+                    /* bar would go here */
+                    1 /* bar end */ +
+                    1 /* gap */ +
+                    5 /* precent len */ +
+                    1 /*gap*/ +
+                    time_fmt.len() /* time amnt*/+
+                    1 /*gap*/ +
+                    self.elems.unit.len() + 2 /* unit len (___/s) */
+                ) {
+            Some(v) => {v},
+            None => {return Err(Box::new(TermSizeError))},
+        };
         let bar_finished_len = (bar_len as f32 * percentage as f32 / 100.0) as isize;
 
         res += "\r";
@@ -108,12 +114,12 @@ impl crate::IsBar for CustomBar {
         res += &self.elems.unit;
         res += "/s";
 
-        res
+        Ok(res)
     }
 
     #[must_use]
-    fn close_method(&self) -> crate::isbar::BarCloseMethod {
-        crate::isbar::BarCloseMethod::LeaveBehind
+    fn close_method(&self) -> Option<crate::isbar::BarCloseMethod> {
+        None
     }
 }
 

@@ -1,6 +1,8 @@
 mod manager_interface;
 pub mod subsets;
 
+use std::error;
+
 pub use manager_interface::IsBarManagerInterface;
 
 /// How the bar is handled when it is completed ([`done`] is called)
@@ -38,13 +40,15 @@ pub trait IsBar {
     ///
     /// [`Bar`]: IsBar
     /// [`BarManager`]: crate::manager::BarManager
-    fn display(&mut self) -> String;
+    fn display(&mut self) -> Result<String, Box<dyn error::Error + Sync>>;
 
     /// Returns how the bar should be handled by the [`BarManager`] after [`done`] is called
     ///
+    /// Returing [`None`] indicates that the [`BarManager`] should chose the default close method
+    /// 
     /// this is for internal use
     ///
     /// [`done`]: IsBar::done
     /// [`BarManager`]: crate::manager::BarManager
-    fn close_method(&self) -> BarCloseMethod;
+    fn close_method(&self) -> Option<BarCloseMethod>;
 }

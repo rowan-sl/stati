@@ -1,6 +1,6 @@
 use core::cell::RefCell;
-use std::fmt::Debug;
-use std::{io::Write, rc::Rc};
+use std::time::{Duration, Instant};
+use std::{io::Write, rc::Rc, fmt::Debug, error};
 
 #[cfg(feature = "fairness")]
 use parking_lot::FairMutex as Mutex;
@@ -8,8 +8,13 @@ use parking_lot::FairMutex as Mutex;
 use parking_lot::Mutex;
 use std::sync::Arc;
 
+use crate::BarCloseMethod;
 use crate::isbar::{IsBar, IsBarManagerInterface};
 use crate::wrapper::{BarWrapper, ThreadedBarWrapper};
+
+#[derive(thiserror::Error, Debug)]
+#[error("Failed to aquire lock on bar in time!")]
+pub struct BarLockTimeoutError;
 
 /**
 Manager for all current progress bars and text output.
@@ -34,15 +39,16 @@ use std::thread;
 use stati::BarManager;
 use stati::prelude::*;
 
-# fn main() {
+# fn main() -> anyhow::Result<()> {
 let mut manager = BarManager::new();
-let mut bar = manager.register(stati::bars::SimpleBar::new(&"Working...", 100));
+let mut bar = manager.register(stati::bars::SimpleBar::new("Working...", 100));
 for i in 0..=100 {
     bar.bar().set_progress(i);
-    manager.print();
+    manager.try_print()?;
     # #[allow(deprecated)]
     thread::sleep_ms(40);
 }
+# Ok(())
 # }
 ```
 
@@ -54,16 +60,17 @@ use std::thread;
 use stati::BarManager;
 use stati::prelude::*;
 
-# fn main() {
+# fn main() -> anyhow::Result<()> {
 let mut manager = BarManager::new();
-let mut bar = manager.register(stati::bars::SimpleBar::new(&"Working...", 100));
+let mut bar = manager.register(stati::bars::SimpleBar::new("Working...", 100));
 for i in 0..=100 {
     bar.bar().set_progress(i);
     stati::println!(manager, "Progressed to {} in the first section", i);
-    manager.print();
+    manager.try_print()?;
     # #[allow(deprecated)]
     thread::sleep_ms(40);
 }
+# Ok(())
 # }
 ```
 
@@ -85,6 +92,7 @@ created with [`register`]
 pub struct BarManager<'bar> {
     bars: Vec<Rc<RefCell<dyn IsBarManagerInterface + 'bar>>>,
     threaded_bars: Vec<Arc<Mutex<dyn IsBarManagerInterface + 'bar>>>,
+    default_bar_close_method: BarCloseMethod,
     print_queue: Vec<String>,
     last_lines: usize,
 }
@@ -97,6 +105,19 @@ impl<'bar> BarManager<'bar> {
             bars: vec![],
             threaded_bars: vec![],
             print_queue: vec![],
+            default_bar_close_method: BarCloseMethod::LeaveBehind,
+            last_lines: 0,
+        }
+    }
+
+    /// Creates a new [`BarManager`] with the desired default [`BarCloseMethod`]
+    #[must_use]
+    pub fn with_close_method(m: BarCloseMethod) -> Self {
+        Self {
+            bars: vec![],
+            threaded_bars: vec![],
+            print_queue: vec![],
+            default_bar_close_method: m,
             last_lines: 0,
         }
     }
@@ -135,7 +156,7 @@ impl<'bar> BarManager<'bar> {
     /// # Panics
     /// if it cannot borrow any of the contained bars
     #[must_use]
-    pub(crate) fn display(&mut self) -> String {
+    pub(crate) fn display(&mut self) -> Result<String, Box<dyn error::Error + Send>> {
         let mut res = String::new();
         // ESC CSI n F (move to the start of the line n lines up)
         // (this is to overwrite previous bars)
@@ -150,61 +171,74 @@ impl<'bar> BarManager<'bar> {
         }
         // res += text;
         // go through all bars, removing ones that are done
-        let mut bar_filterer = |b: &mut Rc<RefCell<dyn IsBarManagerInterface>>| {
-            let mut bref = b.borrow_mut();
+        let mut bar_filterer = |b: &mut Rc<RefCell<dyn IsBarManagerInterface>>| -> Result<bool, Box<dyn error::Error>> {
+            let mut bref = b.try_borrow_mut()?;
             if bref.is_done() {
-                match bref.close_method() {
+                match bref.close_method().unwrap_or(self.default_bar_close_method) {
                     crate::BarCloseMethod::Clear => {}
                     crate::BarCloseMethod::LeaveBehind => {
-                        res += &bref.display();
+                        res += &bref.display()?;
                         res += "\n";
                     }
                 }
-                true
+                Ok(true)
             } else {
-                res += &bref.display();
+                res += &bref.display()?;
                 res += "\n";
-                false
+                Ok(false)
             }
         };
         let mut i = 0;
         while i < self.bars.len() {
-            if bar_filterer(&mut self.bars[i]) {
-                self.bars.remove(i);
-            } else {
-                i += 1;
+            match bar_filterer(&mut self.bars[i]) {
+                Ok(keep) => {
+                    if keep {
+                        self.bars.remove(i);
+                    } else {
+                        i += 1;
+                    }
+                }
+                Err(e) => return Err(e)
             }
         }
         //& do it again, but with threaded bars this time
         // res += text;
         // go through all bars, removing ones that are done
-        let mut bar_filterer = |b: &mut Arc<Mutex<dyn IsBarManagerInterface>>| {
-            let mut bref = b.lock();
+        let mut bar_filterer = |b: &mut Arc<Mutex<dyn IsBarManagerInterface>>| -> Result<bool, Box<dyn error::Error>> {
+            let mut bref = match b.try_lock_until(Instant::now() + Duration::from_millis(100)) {
+                Some(g) => {g},
+                None => {return Err(Box::new(BarLockTimeoutError))},
+            };
             if bref.is_done() {
-                match bref.close_method() {
+                match bref.close_method().unwrap_or(self.default_bar_close_method) {
                     crate::BarCloseMethod::Clear => {}
                     crate::BarCloseMethod::LeaveBehind => {
-                        res += &bref.display();
+                        res += &bref.display()?;
                         res += "\n";
                     }
                 }
-                true
+                Ok(true)
             } else {
-                res += &bref.display();
+                res += &bref.display()?;
                 res += "\n";
-                false
+                Ok(false)
             }
         };
         let mut i = 0;
         while i < self.threaded_bars.len() {
-            if bar_filterer(&mut self.threaded_bars[i]) {
-                self.threaded_bars.remove(i);
-            } else {
-                i += 1;
+            match bar_filterer(&mut self.threaded_bars[i]) {
+                Ok(keep) => {
+                    if keep {
+                        self.bars.remove(i);
+                    } else {
+                        i += 1;
+                    }
+                }
+                Err(e) => return Err(e)
             }
         }
         self.last_lines = self.bars.len() + self.threaded_bars.len();
-        res
+        Ok(res)
     }
 
     /// Attempts to flush the output, returning if it was sucsessfull or not
@@ -247,16 +281,28 @@ impl<'bar> BarManager<'bar> {
     /// Attempts to print and flush stdout
     ///
     /// # Errors
-    /// if stdout could not be flushed
-    pub fn try_print(&mut self) -> std::io::Result<()> {
-        self.print_no_flush();
-        self.try_flush()
+    /// if stdout could not be flushed, or a bar could not be displayed
+    pub fn try_print(&mut self) -> Result<(), BarManagerTryPrintError> {
+        self.print_no_flush()?;
+        self.try_flush()?;
+        Ok(())
     }
 
     /// Prints the bar status and any queued text to stdout, without flushing it
-    pub fn print_no_flush(&mut self) {
-        std::print!("{}", self.display());
+    pub fn print_no_flush(&mut self) -> Result<(), Box<dyn error::Error>> {
+        std::print!("{}", self.display()?);
+        Ok(())
     }
+}
+
+/// error for [`BarManager::try_print`]
+#[derive(thiserror::Error, Debug)]
+pub enum BarManagerTryPrintError {
+    #[error("Failed to flush the output stream!\n{0}")]
+    Flush(#[from] std::io::Error),
+    #[error("Faild to display bar!\n{0}")]
+    Display(#[from] Box<dyn error::Error>)
+
 }
 
 impl<'bar> Default for BarManager<'bar> {

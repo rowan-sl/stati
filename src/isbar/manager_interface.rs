@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use std::error;
 
 use super::{BarCloseMethod, IsBar};
 
@@ -9,18 +10,18 @@ use super::{BarCloseMethod, IsBar};
 /// [`BarManager`]: crate::manager::BarManager
 /// [`IsBar`]: crate::isbar::IsBar
 pub trait IsBarManagerInterface: Debug {
-    fn display(&mut self) -> String;
+    fn display(&mut self) -> Result<String, Box<dyn error::Error + Sync>>;
 
     fn is_done(&self) -> bool;
 
-    fn close_method(&self) -> BarCloseMethod;
+    fn close_method(&self) -> Option<BarCloseMethod>;
 }
 
 impl<T> IsBarManagerInterface for T
 where
     T: IsBar + Debug,
 {
-    fn display(&mut self) -> String {
+    fn display(&mut self) -> Result<String, Box<dyn error::Error + Sync>> {
         <T as IsBar>::display(self)
     }
 
@@ -28,7 +29,7 @@ where
         <T as IsBar>::is_done(self)
     }
 
-    fn close_method(&self) -> BarCloseMethod {
+    fn close_method(&self) -> Option<BarCloseMethod> {
         self.close_method()
     }
 }

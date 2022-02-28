@@ -60,16 +60,16 @@ impl IsBar for Spinni {
         self.done
     }
 
-    fn close_method(&self) -> crate::BarCloseMethod {
-        self.close_method
+    fn close_method(&self) -> Option<crate::BarCloseMethod> {
+        Some(self.close_method)
     }
 
-    fn display(&mut self) -> String {
+    fn display(&mut self) -> Result<String, Box<dyn std::error::Error>> {
         if self.tick_on_display {
             self.tick();
         }
         let spini_step = self.tick_strings[self.current_char];
-        format!("{} {}: {}", spini_step, self.job_name, self.subtask)
+        Ok(format!("{} {}: {}", spini_step, self.job_name, self.subtask))
     }
 }
 

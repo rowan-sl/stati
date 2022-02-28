@@ -1,3 +1,5 @@
+use super::common::TermWidthError;
+
 const FILLED: &str = "=";
 const EMPTY: &str = "-";
 const START: &str = "[";
@@ -50,9 +52,11 @@ impl crate::IsBar for SimpleBar {
     /// starts with "\r" and has no end char
     ///
     ///  if it cannot get the real term size, uses 81 as the size
-    fn display(&mut self) -> String {
-        //TODO make this not use default
-        let width = crate::utils::term_width().unwrap_or(81);
+    fn display(&mut self) -> Result<String, Box<dyn std::error::Error>> {
+        let width = match crate::utils::term_width() {
+            Some(v) => {v},
+            None => {return Err(Box::new(TermWidthError))},
+        } as usize;
 
         let mut res =
             String::with_capacity(width as usize /* starts out as a u16, so its fine */);
@@ -69,7 +73,7 @@ impl crate::IsBar for SimpleBar {
         for _ in 0..bar_finished_len {
             res += FILLED;
         }
-        for _ in bar_finished_len..i32::from(bar_len) {
+        for _ in bar_finished_len as usize..bar_len {
             res += EMPTY;
         }
         res += END;
@@ -78,11 +82,12 @@ impl crate::IsBar for SimpleBar {
         res += &format!("{:>4}", percentage);
         res += UNIT;
 
-        res
+        Ok(res)
     }
 
-    fn close_method(&self) -> crate::isbar::BarCloseMethod {
-        crate::isbar::BarCloseMethod::LeaveBehind
+    #[must_use]
+    fn close_method(&self) -> Option<crate::isbar::BarCloseMethod> {
+        None
     }
 }
 

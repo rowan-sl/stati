@@ -73,6 +73,7 @@ MIT, see [LICENSE](LICENSE)
 - [x] multithreading!
 - [x] windows support
 - [x] improve docs
+- [x] better error handling
 - [ ] improve tests
 - [ ] improve examples
 - [ ] better iterator tracking

@@ -1,6 +1,8 @@
 //! Simple progress bar implementations.
 //! use these or create your own!
 
+pub mod common;
+
 pub mod simple;
 pub use simple::SimpleBar;
 
